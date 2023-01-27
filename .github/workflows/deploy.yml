@@ -59,7 +59,7 @@ jobs:
       - name: Run new server (in background)
         run: |
           cd ~/source
-          nohup npm run dev 2>&1 &
+          nohup npm run dev 2>&1 & >> log.txt
         env:
           PORT: ${{ secrets.PORT }}
           SECRET: ${{ secrets.SECRET }}
