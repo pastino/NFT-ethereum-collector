@@ -59,6 +59,7 @@ jobs:
 
       - name: Run new server (in background)
         env:
+          RUNNER_TRACKING_ID: ""
           PORT: ${{ secrets.PORT }}
           SECRET: ${{ secrets.SECRET }}
           AWS_ACCESS_ID: ${{ secrets.AWS_ACCESS_ID }}
