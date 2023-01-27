@@ -28,7 +28,7 @@ jobs:
 
       - name: Stop old server (ignore error)
         run: |
-          sudo npx pm2 kill
+          pm2 kill
 
       - name: Remove old server in ~/ethereum-collector (ignore error)
         run: |
@@ -74,7 +74,7 @@ jobs:
           OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
         run: |
           cd ~/ethereum-collector
-          sudo npx pm2 install typescript
+          pm2 install typescript
           npm run start
 
 # 참고자료
