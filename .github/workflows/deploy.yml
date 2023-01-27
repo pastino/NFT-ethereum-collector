@@ -1,5 +1,5 @@
 name: App install and start
-
+#
 concurrency:
   group: production
   cancel-in-progress: true
@@ -39,7 +39,27 @@ jobs:
           mkdir -p ~/source
           cp -R ./ ~/source
 
+      - name: create env file
+        run: |
+          cd ~/source
+          touch .env
+          echo PORT=${{ secrets.PORT }} >> .env
+          echo SECRET=${{ secrets.SECRET }} >> .env
+          echo AWS_ACCESS_ID=${{ secrets.AWS_ACCESS_ID }} >> .env
+          echo AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} >> .env
+          echo OPERATOR_ID=${{ secrets.OPERATOR_ID }} >> .env
+          echo HOST=${{ secrets.HOST }} >> .env
+          echo MYSQL_PORT=${{ secrets.MYSQL_PORT }} >> .env
+          echo USERNAME=${{ secrets.USERNAME }} >> .env
+          echo PASSWORD=${{ secrets.PASSWORD }} >> .env
+          echo DATABASE=${{ secrets.DATABASE }} >> .env
+          echo ALIGO_API_KEY=${{ secrets.ALIGO_API_KEY }} >> .env
+          echo ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }} >> .env
+          echo OPENSEA_API_KEY=${{ secrets.OPENSEA_API_KEY }} >> .env
       - name: Run new server (in background)
+        run: |
+          cd ~/source
+          nohup npm run dev </dev/null >/dev/null 2>&1 &
         env:
           PORT: ${{ secrets.PORT }}
           SECRET: ${{ secrets.SECRET }}
@@ -54,6 +74,3 @@ jobs:
           ALIGO_API_KEY: ${{ secrets.ALIGO_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
-        run: |
-          cd ~/source
-          nohup npm run dev </dev/null >/dev/null 2>&1 &
