@@ -24,7 +24,6 @@ jobs:
 
       - name: Install dependencies
         working-directory: src
-
         run: npm install
 
       - name: Stop old server (ignore error)
@@ -45,4 +44,4 @@ jobs:
           RUNNER_TRACKING_ID: ""
         run: |
           cd ~/source
-          nohup npm run start </dev/null >/dev/null 2>&1 &
+          nohup npm run dev </dev/null >/dev/null 2>&1 &
