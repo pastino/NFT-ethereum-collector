@@ -1,5 +1,5 @@
 name: App install and start
-
+#
 concurrency:
   group: production
   cancel-in-progress: true
@@ -23,7 +23,7 @@ jobs:
           node-version: 16.x
 
       - name: Install dependencies
-        working-directory: service
+        working-directory: src
         run: npm install
 
       - name: Stop old server (ignore error)
@@ -44,4 +44,4 @@ jobs:
           RUNNER_TRACKING_ID: ""
         run: |
           cd ~/source
-          nohup npm run start </dev/null >/dev/null 2>&1 &
+          nohup npm run dev </dev/null >/dev/null 2>&1 &
