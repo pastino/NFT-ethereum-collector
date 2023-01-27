@@ -32,16 +32,16 @@ jobs:
 
       - name: Remove old server in ~/soruce (ignore error)
         run: |
-          rm -rf ~/source || true
+          rm -rf ~/ethereum-collector || true
 
       - name: Copy new server to ~/soruce
         run: |
-          mkdir -p ~/source
-          cp -R ./ ~/source
+          mkdir -p ~/ethereum-collector
+          cp -R ./ ~/ethereum-collector
 
       - name: create env file
         run: |
-          cd ~/source
+          cd ~/ethereum-collector
           touch .env
           echo PORT=${{ secrets.PORT }} >> .env
           echo SECRET=${{ secrets.SECRET }} >> .env
@@ -58,8 +58,8 @@ jobs:
           echo OPENSEA_API_KEY=${{ secrets.OPENSEA_API_KEY }} >> .env
       - name: Run new server (in background)
         run: |
-          cd ~/source
-          nohup npm run dev 2>&1 & >> log.txt
+          cd ~/ethereum-collector
+          nohup npm run dev </dev/null >/dev/null 2>&1 > test.log &
         env:
           PORT: ${{ secrets.PORT }}
           SECRET: ${{ secrets.SECRET }}
