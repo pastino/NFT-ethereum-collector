@@ -28,7 +28,7 @@ jobs:
 
       - name: Stop old server (ignore error)
         run: |
-          killall -9 node || true
+          npx pm2 kill
 
       - name: Remove old server in ~/ethereum-collector (ignore error)
         run: |
@@ -59,6 +59,7 @@ jobs:
 
       - name: Run new server (in background)
         env:
+          RUNNER_TRACKING_ID: ""
           PORT: ${{ secrets.PORT }}
           SECRET: ${{ secrets.SECRET }}
           AWS_ACCESS_ID: ${{ secrets.AWS_ACCESS_ID }}
@@ -74,7 +75,8 @@ jobs:
           OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
         run: |
           cd ~/ethereum-collector
-          nohup npm run dev </dev/null >/dev/null 2>&1 &
+          npx pm2 install typescript
+          npm run start &
 
 # 참고자료
 # https://velog.io/@ron/Github-Action-%EC%9C%BC%EB%A1%9C-%EB%AC%BC%EB%A6%AC%EC%84%9C%EB%B2%84%EC%97%90-%EC%9E%90%EB%8F%99%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0

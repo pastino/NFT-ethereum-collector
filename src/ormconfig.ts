@@ -9,13 +9,13 @@ const ormconfig: ConnectionOptions = {
   database: process.env.DATABASE,
   synchronize: true,
   logging: ["warn", "error"],
-  entities: ["src/entities/**/*.ts"],
-  migrations: ["src/migrations/**/*.ts"],
-  subscribers: ["src/subscribers/**/*.ts"],
+  entities: ["./entities/**/*.ts"],
+  migrations: ["./migrations/**/*.ts"],
+  subscribers: ["./subscribers/**/*.ts"],
   cli: {
-    entitiesDir: "src/entities",
-    migrationsDir: "src/migrations",
-    subscribersDir: "src/subscribers",
+    entitiesDir: "./entities",
+    migrationsDir: "./migrations",
+    subscribersDir: "./subscribers",
   },
 };
 
