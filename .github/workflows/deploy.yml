@@ -41,7 +41,19 @@ jobs:
 
       - name: Run new server (in background)
         env:
-          RUNNER_TRACKING_ID: ""
+          PORT: ${{ secrets.PORT }}
+          SECRET: ${{ secrets.SECRET }}
+          AWS_ACCESS_ID: ${{ secrets.AWS_ACCESS_ID }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          OPERATOR_ID: ${{ secrets.OPERATOR_ID }}
+          HOST: ${{ secrets.HOST }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          DATABASE: ${{ secrets.DATABASE }}
+          ALIGO_API_KEY: ${{ secrets.ALIGO_API_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
         run: |
           cd ~/source
           nohup npm run dev </dev/null >/dev/null 2>&1 &
