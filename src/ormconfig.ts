@@ -2,11 +2,11 @@ import { ConnectionOptions } from "typeorm";
 
 const ormconfig: ConnectionOptions = {
   type: "mysql",
-  host: process.env.host,
-  port: Number(process.env.port),
-  username: process.env.username,
-  password: process.env.password,
-  database: process.env.database,
+  host: process.env.HOST,
+  port: Number(process.env.MYSQL_PORT),
+  username: process.env.USERNAME,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
   synchronize: true,
   logging: ["warn", "error"],
   entities: ["src/entities/**/*.ts"],
