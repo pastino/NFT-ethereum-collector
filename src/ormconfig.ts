@@ -1,3 +1,4 @@
+import { join } from "path";
 import { ConnectionOptions } from "typeorm";
 
 const ormconfig: ConnectionOptions = {
@@ -9,13 +10,13 @@ const ormconfig: ConnectionOptions = {
   database: process.env.DATABASE,
   synchronize: true,
   logging: ["warn", "error"],
-  entities: ["./entities/**/*.ts"],
-  migrations: ["./migrations/**/*.ts"],
-  subscribers: ["./subscribers/**/*.ts"],
+  entities: [__dirname + "/entities/*.*"],
+  migrations: [__dirname + "/migrations/*.*"],
+  subscribers: [__dirname + "/subscribers/*.*"],
   cli: {
-    entitiesDir: "./entities",
-    migrationsDir: "./migrations",
-    subscribersDir: "./subscribers",
+    entitiesDir: __dirname + "/entities",
+    migrationsDir: __dirname + "/migrations",
+    subscribersDir: __dirname + "/subscribers",
   },
 };
 
