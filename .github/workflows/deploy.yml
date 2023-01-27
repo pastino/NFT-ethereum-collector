@@ -59,7 +59,7 @@ jobs:
       - name: Run new server (in background)
         run: |
           cd ~/ethereum-collector
-          nohup npm run dev </dev/null >/dev/null 2>&1 > test.log &
+          nohup npm run dev </dev/null >/dev/null 2>&1 &
         env:
           PORT: ${{ secrets.PORT }}
           SECRET: ${{ secrets.SECRET }}
