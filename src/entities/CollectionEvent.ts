@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
+import { Collection } from "./Collection";
 import { NFT } from "./NFT";
 
 @Entity()
@@ -20,6 +21,13 @@ export class CollectionEvent {
   })
   @JoinColumn({ name: "nftId", referencedColumnName: "id" })
   nftId: number;
+
+  @Column({ type: "int", nullable: true })
+  @ManyToOne(() => Collection, (collection) => collection.id, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "collectionId", referencedColumnName: "id" })
+  collectionId: number;
 
   @Column({ nullable: true })
   eventType: string;
@@ -101,28 +109,3 @@ export class CollectionEvent {
   @UpdateDateColumn()
   updateAt: Date;
 }
-
-// asset: {
-//   token_id: "1242",
-// },
-
-// from_account: {
-//   user: {
-//     username: "LOUPIG",
-//   },
-//   profile_img_url:
-//     "https://storage.googleapis.com/opensea-static/opensea-profile/1.png",
-//   address: "0xcafeb47ae83865142dbb895bca3b18269ea91e1e",
-//   config: "",
-// },
-// seller: {
-//   user: {
-//     username: "LOUPIG",
-//   },
-//   profile_img_url:
-//     "https://storage.googleapis.com/opensea-static/opensea-profile/1.png",
-//   address: "0xcafeb47ae83865142dbb895bca3b18269ea91e1e",
-//   config: "",
-// },
-// to_account: null,
-// winner_account: null,
