@@ -2,16 +2,21 @@ import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import axios from "axios";
 import { Collection } from "../entities/Collection";
-import { getEntityKeyList, snakeToCamelObject } from "../utils";
 import { NFT } from "../entities/NFT";
 import { CollectionEvent } from "../entities/CollectionEvent";
 import { User } from "../entities/User";
+import { Message } from "../modules/kakaoMessage";
+import { CreateEntityData } from "../modules/manufactureData";
+
+// TODO 절대경로 생성
+// TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
 
 const headerConfig = {
   headers: {
     "X-API-KEY": process.env.OPENSEA_API_KEY as string,
   },
 };
+const sendMessage = new Message();
 
 const createCollection = async (contractAddress: string) => {
   try {
@@ -22,27 +27,29 @@ const createCollection = async (contractAddress: string) => {
 
     const { status, data } = response;
 
-    // request 오류 시 오류 리턴
-    if (status !== 200) return { isSuccess: false, collectionData: null };
+    // request 오류 시 오류 리턴, 카카오톡으로 에러정보 전달
+    if (status !== 200) {
+      sendMessage.collection(contractAddress);
+      return { isSuccess: false, collectionData: null };
+    }
 
-    // response 데이터 snake case 키값을 camel case로 변경
-    const createData = snakeToCamelObject({
-      ...data?.collection,
-      address: data?.address,
+    // 컬랙션 데이터 객체 생성
+    const createEntityData = new CreateEntityData({
+      snakeObject: {
+        ...data?.collection,
+        address: data?.address,
+      },
+      entity: Collection,
     });
-    // Collection Entity 키값 리스트 얻기
-    const collectionKeyList = getEntityKeyList({ entity: Collection });
 
-    // Table Row 데이터 생성
-    const createRowData: any = {};
-    collectionKeyList.map(
-      (key: string) => (createRowData[key] = createData[key])
+    // 컬랙션 데이터 Insert
+    const collectionData = await getRepository(Collection).save(
+      createEntityData.createTableRowData()
     );
-
-    const collectionData = await getRepository(Collection).save(createRowData);
 
     return { isSuccess: true, collectionData };
   } catch (e) {
+    sendMessage.collection(contractAddress);
     return { isSuccess: false, collectionData: null };
   }
 };
@@ -50,10 +57,12 @@ const createCollection = async (contractAddress: string) => {
 const createNFT = async (collectionData: Collection) => {
   try {
     let cursor = "";
-    const isContinue = cursor !== null;
     let page = 1;
 
-    while (isContinue) {
+    while (true) {
+      if (cursor === null) {
+        return { isSuccess: true };
+      }
       const response = await axios.get(
         `https://api.opensea.io/api/v1/assets?collection_slug=${collectionData.slug}&cursor=${cursor}`,
         headerConfig
@@ -64,27 +73,53 @@ const createNFT = async (collectionData: Collection) => {
         data: { next, assets },
       } = response;
 
-      // TODO 1. request 오류 시 오류 내용 저장 필요
-      // TODO 2. request 오류 시 카톡으로 내용 알리기
-      if (status !== 200) break;
+      if (status !== 200) {
+        sendMessage.nft(collectionData.address);
+        return { isSuccess: false };
+      }
 
       cursor = next;
 
       // assets(NFT) 데이터들을 저장한다
       for (let i = 0; i < assets.length; i++) {
         console.log(`<NFT 생성> ${page}번째 페이지의 ${i}번째 NFT 입니다`);
+
         const asset = assets[i];
-        // response 데이터 snake case 키값을 camel case로 변경
-        const createData = snakeToCamelObject(asset);
-        // NFT Entity 키값 리스트 얻기
-        const nftKeyList = getEntityKeyList({ entity: NFT });
 
-        // Table Row 데이터 생성
-        const createRowData: any = {};
-        nftKeyList.map((key: string) => (createRowData[key] = createData[key]));
+        // 첫 번째 데이터에서 컬랙션 Creator 정보를 생성한다.
+        if (page === 1 && i === 0) {
+          const {
+            user: { username },
+            profile_img_url,
+            address,
+            config,
+          } = asset?.creator;
 
+          const existingUser = await getRepository(User).findOne({
+            where: {
+              address,
+            },
+          });
+
+          if (!existingUser) {
+            await getRepository(User).save({
+              username,
+              profileImgUrl: profile_img_url,
+              address,
+              config,
+            });
+          }
+        }
+
+        // NFT 데이터 객체 생성
+        const createEntityData = new CreateEntityData({
+          snakeObject: asset,
+          entity: NFT,
+        });
+
+        // NFT 데이터 Insert
         await getRepository(NFT).save({
-          ...createRowData,
+          ...createEntityData.createTableRowData(),
           collectionId: collectionData.id,
         });
       }
@@ -94,6 +129,7 @@ const createNFT = async (collectionData: Collection) => {
 
     return { isSuccess: true };
   } catch (e) {
+    sendMessage.nft(collectionData.address);
     return { isSuccess: false };
   }
 };
@@ -101,10 +137,13 @@ const createNFT = async (collectionData: Collection) => {
 const createEvent = async (collectionData: Collection) => {
   try {
     let cursor = "";
-    const isContinue = cursor !== null;
     let page = 1;
 
-    while (isContinue) {
+    while (true) {
+      if (cursor === null) {
+        return { isSuccess: true };
+      }
+
       const response = await axios.get(
         `https://api.opensea.io/api/v1/events?collection_slug=${collectionData.slug}&cursor=${cursor}`,
         headerConfig
@@ -114,9 +153,11 @@ const createEvent = async (collectionData: Collection) => {
         data: { next, asset_events },
       } = response;
 
-      // TODO 1. request 오류 시 오류 내용 저장 필요
-      // TODO 2. request 오류 시 카톡으로 내용 알리기
-      if (status !== 200) break;
+      // TODO request 오류 시 오류 내용 저장 필요
+      // TODO request 오류 시 카톡으로 내용 알리기
+      if (status !== 200) {
+        return { isSuccess: false };
+      }
 
       cursor = next;
 
@@ -143,9 +184,6 @@ const createEvent = async (collectionData: Collection) => {
           // TODO nft id 없이 저장하기
         }
 
-        // response 데이터 snake case 키값을 camel case로 변경
-        const createData = snakeToCamelObject(event);
-
         // NFT Entity 키값 리스트 얻기
         const filterList = [
           "approvedAccount",
@@ -155,21 +193,23 @@ const createEvent = async (collectionData: Collection) => {
           "toAccount",
           "winnerAccount",
         ];
-        const eventKeyList = getEntityKeyList({
+
+        // 이벤트 데이터 객체 생성
+        const createEntityData = new CreateEntityData({
+          snakeObject: event,
           entity: CollectionEvent,
         });
-        // Table Row 데이터 생성
-        const createRowData: any = {};
-        eventKeyList.map(
-          (key: string) => (createRowData[key] = createData[key])
-        );
+        const data = createEntityData.createTableRowData();
+
+        console.log("data", data);
 
         const hasDataListOfAccountData: { accountType: string; user: User }[] =
           [];
 
         for (let j = 0; j < filterList.length; j++) {
           const accountType = filterList[j];
-          const accountData = createRowData[accountType];
+          const accountData =
+            createEntityData.createTableRowData()[accountType];
           if (accountData) {
             let user = null;
 
@@ -206,7 +246,8 @@ const createEvent = async (collectionData: Collection) => {
         };
 
         await getRepository(CollectionEvent).save({
-          ...createRowData,
+          ...createEntityData.createTableRowData(),
+          collectionId: collectionData.id,
           nftId: nftData ? nftData.id : null,
           approvedAccount: getUserId("approvedAccount"),
           ownerAccount: getUserId("ownerAccount"),
@@ -216,11 +257,8 @@ const createEvent = async (collectionData: Collection) => {
           winnerAccount: getUserId("winnerAccount"),
         });
       }
-
       page += 1;
     }
-
-    return { isSuccess: true };
   } catch (e) {
     return { isSuccess: false };
   }
@@ -228,22 +266,8 @@ const createEvent = async (collectionData: Collection) => {
 
 const CreateCollectionData = async (req: Request, res: Response) => {
   try {
-    // Creator 정보 저장
-    // creator: {
-    //     user: {
-    //       username: "Porsche",
-    //     },
-    //     profile_img_url:
-    //       "https://storage.googleapis.com/opensea-static/opensea-profile/11.png",
-    //     address: "0xd44fbb29dcb78b560bf66544921dd22a9f650339",
-    //     config: "verified",
-    //   },
-    // NFT 데이터 저장
-    // Event 저장
-
-    // 생성 중간 단계에 계속 카톡을 준다.
-    // 생성이 완료되면 카톡을 준다.
-
+    // TODO 생성 중간 단계에 계속 카톡을 준다.
+    // TODO 생성이 완료되면 카톡을 준다.
     const {
       body: { collectionList },
     }: { body: { collectionList: string[] } } = req;
@@ -251,24 +275,29 @@ const CreateCollectionData = async (req: Request, res: Response) => {
     for (let i = 0; i < collectionList.length; i++) {
       const contractAddress = collectionList[i];
 
-      const collectionData = (await getRepository(Collection).findOne({
+      // 이미 수집된 컬랙션이 존재하면 카톡으로 알리고, 해당 컬랙션 수집 생략
+      const existingCollectionData = (await getRepository(Collection).findOne({
         where: {
           address: contractAddress,
         },
       })) as Collection;
 
-      //   // Collection 데이터 생성
-      //   const { isSuccess: isCollectionSuccess, collectionData } =
-      //     await createCollection(contractAddress);
-      //   if (!isCollectionSuccess) return res.status(200).send({ success: false });
+      if (existingCollectionData) {
+        sendMessage.alreadyCollected(contractAddress);
+        continue;
+      }
 
-      //   // NFT 데이터 생성
-      //   const { isSuccess: isNFTSuccess } = await createNFT(collectionData);
-      //   if (!isNFTSuccess) return res.status(200).send({ success: false });
+      // Collection 데이터 생성
+      const { isSuccess: isCollectionSuccess, collectionData } =
+        await createCollection(contractAddress);
+      if (!isCollectionSuccess) continue;
+
+      // NFT 데이터 생성
+      const { isSuccess: isNFTSuccess } = await createNFT(collectionData);
+      if (!isNFTSuccess) return res.status(200).send({ success: false });
 
       // Event 데이터 생성
       const { isSuccess: isEventSuccess } = await createEvent(collectionData);
-      console.log("isEventSuccess", isEventSuccess);
       if (!isEventSuccess) return res.status(200).send({ success: false });
     }
 

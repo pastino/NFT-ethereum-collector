@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
+import { CollectionEvent } from "./CollectionEvent";
 import { NFT } from "./NFT";
 
 @Entity()
@@ -93,6 +94,11 @@ export class Collection {
     onDelete: "CASCADE",
   })
   nft: NFT[];
+
+  @OneToMany(() => CollectionEvent, (nft) => nft.collectionId, {
+    onDelete: "CASCADE",
+  })
+  collectionEvent: CollectionEvent[];
 
   @CreateDateColumn()
   createAt: Date;
