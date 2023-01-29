@@ -56,6 +56,7 @@ jobs:
           echo ALIGO_API_KEY=${{ secrets.ALIGO_API_KEY }} >> .env
           echo ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }} >> .env
           echo OPENSEA_API_KEY=${{ secrets.OPENSEA_API_KEY }} >> .env
+          echo KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} >> .env
 
       - name: Run new server (in background)
         env:
@@ -73,6 +74,7 @@ jobs:
           ALIGO_API_KEY: ${{ secrets.ALIGO_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
         run: |
           cd ~/ethereum-collector
           npx pm2 install typescript
