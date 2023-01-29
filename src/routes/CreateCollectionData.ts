@@ -82,7 +82,7 @@ const createNFT = async (collectionData: Collection) => {
 
       // assets(NFT) 데이터들을 저장한다
       for (let i = 0; i < assets.length; i++) {
-        console.log(`<NFT 생성> ${page}번째 페이지의 ${i}번째 NFT 입니다`);
+        console.log(`<NFT 생성> ${page}번째 페이지의 ${i + 1}번째 NFT 입니다`);
 
         const asset = assets[i];
 
@@ -126,8 +126,6 @@ const createNFT = async (collectionData: Collection) => {
 
       page += 1;
     }
-
-    return { isSuccess: true };
   } catch (e) {
     sendMessage.nft(collectionData.address);
     return { isSuccess: false };
@@ -200,8 +198,6 @@ const createEvent = async (collectionData: Collection) => {
           entity: CollectionEvent,
         });
         const data = createEntityData.createTableRowData();
-
-        console.log("data", data);
 
         const hasDataListOfAccountData: { accountType: string; user: User }[] =
           [];
