@@ -15,7 +15,19 @@ export class KakaoAccessToken {
   accessToken: string;
 
   @Column({ nullable: true })
+  expiresIn: number;
+
+  @Column({ nullable: true })
+  scope: string;
+
+  @Column({ nullable: true })
+  refreshTokenExpiresIn: number;
+
+  @Column({ nullable: true })
   refreshToken: string;
+
+  @Column({ nullable: true })
+  tokenType: string;
 
   @CreateDateColumn()
   createAt: Date;

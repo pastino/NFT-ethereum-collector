@@ -4,12 +4,14 @@ import { getRepository } from "typeorm";
 import { FeedTypeKakaoTemplate, TextTypeKakaoTemplate } from "./types";
 import { Collection } from "../entities/Collection";
 import moment from "moment";
+import { isAxiosError } from "../commons/utils";
 
 export class Message {
   constructor() {}
 
-  private sendMessage = (text: string) =>
-    sendKakaoMessage({
+  private sendMessage = (text: string) => {
+    const sendMessge = new SendMessage();
+    sendMessge.sendKakaoMessage({
       object_type: "text",
       text,
       link: {
@@ -17,8 +19,9 @@ export class Message {
         web_url: "",
       },
     });
+  };
 
-  alreadyCollected = (contractAddress: string) => {
+  public alreadyCollected = (contractAddress: string) => {
     this.sendMessage(
       `${moment(new Date()).format(
         "MM/DD HH:mm"
@@ -26,14 +29,14 @@ export class Message {
     );
   };
 
-  collection = (contractAddress: string) => {
+  public collection = (contractAddress: string) => {
     this.sendMessage(
       `${moment(new Date()).format(
         "MM/DD HH:mm"
       )}\n\n<컬랙션 수집>\n\nError - 오픈시 API 전송에 실파하였습니다.\nn컬랙션 데이터 get 전송에 실파하였습니다.\n\n해당 컬랙션 데이터 수집은 생략하였습니다.\n\n주소 - ${contractAddress}`
     );
   };
-  nft = (contractAddress: string) => {
+  public nft = (contractAddress: string) => {
     this.deleteColectedData(contractAddress);
     this.sendMessage(
       `${moment(new Date()).format(
@@ -41,7 +44,7 @@ export class Message {
       )}\n\n<컬랙션 수집>\n\nError - 오픈시 API 전송에 실파하였습니다.\n\nNFT 데이터 get 전송에 실파하였습니다.\n\n해당 컬랙션에 대한 데이터는 모두 삭제 및 수집 생락하였습니다.\n\n주소 - ${contractAddress}`
     );
   };
-  event = (contractAddress: string) => {
+  public event = (contractAddress: string) => {
     this.deleteColectedData(contractAddress);
     this.sendMessage(
       `${moment(new Date()).format(
@@ -54,39 +57,96 @@ export class Message {
   };
 }
 
-export const sendKakaoMessage = async (
-  kakaoTemplateObject: TextTypeKakaoTemplate | FeedTypeKakaoTemplate
-) => {
-  const kakao = await getRepository(KakaoAccessToken).find();
-  if (kakao.length === 0) return;
-  const { accessToken, refreshToken } = kakao?.[0];
+export class SendMessage {
+  constructor() {}
 
-  try {
-    const response = await axios({
-      method: "post",
-      url: `https://kapi.kakao.com/v2/api/talk/memo/default/send`,
-      params: {
-        template_object: kakaoTemplateObject,
-      },
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
+  private getKakaoToken = async (): Promise<KakaoAccessToken | null> => {
+    const kakao = await getRepository(KakaoAccessToken).findOne({
+      order: { id: "DESC" },
     });
+    if (!kakao) return null;
 
-    const resultCode = response?.data?.result_code;
+    return kakao;
+  };
 
-    // access token 만료 시 재발급 후 다시 전송하기
-    if (resultCode === 0) {
-      console.log("성공");
+  private isTokenExpired = (tokenData: KakaoAccessToken) => {
+    const createdTimeStamp = new Date(tokenData?.createAt).getTime();
+    const currentTimeStamp = new Date().getTime();
+
+    const passedTimeSecond = (currentTimeStamp - createdTimeStamp) / 1000;
+    const expiredTimeSecond = tokenData?.expiresIn;
+
+    const isExpired = passedTimeSecond > expiredTimeSecond;
+
+    if (isExpired) return true;
+    return false;
+  };
+
+  private createNewToken = async (tokenData: KakaoAccessToken) => {
+    try {
+      const response = await axios({
+        method: "post",
+        url: `https://kauth.kakao.com/oauth/token`,
+        params: {
+          grant_type: "refresh_token",
+          client_id: process.env.KAKAO_CLIENT_ID,
+          refresh_token: tokenData.refreshToken,
+        },
+      });
+
+      const data = response?.data;
+
+      await getRepository(KakaoAccessToken).save({
+        accessToken: data?.access_token,
+        expiresIn: data?.expires_in,
+        refreshToken: data?.refresh_token || tokenData?.refreshToken,
+        refreshTokenExpiresIn:
+          data?.refresh_token_expires_in || tokenData?.refreshTokenExpiresIn,
+        scope: tokenData?.scope,
+        tokenType: data?.token_type,
+      });
+    } catch (e) {
+      console.log(e);
     }
-  } catch (e: any) {
-    // TODO axios interceptor 적용 필요
+  };
 
-    // e?.response?.data
-    // { msg: 'this access token is already expired', code: -401 }
-    // 여기서 재전송??
-    // axios 인터셉터를 한번 사용해봐야 겠음.
-    console.log(e?.response?.data);
-  }
-};
+  public sendKakaoMessage = async (
+    kakaoTemplateObject: TextTypeKakaoTemplate | FeedTypeKakaoTemplate
+  ) => {
+    const tokenData = await this.getKakaoToken();
+    if (!tokenData) return;
+    const isExpired = this.isTokenExpired(tokenData);
+
+    if (isExpired) {
+      this.createNewToken(tokenData);
+    }
+
+    try {
+      const { accessToken } = (await this.getKakaoToken()) as KakaoAccessToken;
+
+      const response = await axios({
+        method: "post",
+        url: `https://kapi.kakao.com/v2/api/talk/memo/default/send`,
+        params: {
+          template_object: kakaoTemplateObject,
+        },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const resultCode = response?.data?.result_code;
+
+      if (resultCode === 0) {
+        console.log("성공");
+      }
+    } catch (e: unknown) {
+      if (isAxiosError(e)) {
+        if (e?.response?.data?.code === -401) {
+          console.log("토큰 만료 유효성 검사 수정");
+        }
+      }
+    }
+  };
+}
