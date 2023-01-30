@@ -88,12 +88,7 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
 
         // 첫 번째 데이터에서 컬랙션 Creator 정보를 생성한다.
         if (page === 1 && i === 0) {
-          const {
-            user: { username },
-            profile_img_url,
-            address,
-            config,
-          } = asset?.creator;
+          const { user, profile_img_url, address, config } = asset?.creator;
 
           const existingUser = await getRepository(User).findOne({
             where: {
@@ -103,7 +98,7 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
 
           if (!existingUser) {
             await getRepository(User).save({
-              username: username || "",
+              username: user?.username || "",
               profileImgUrl: profile_img_url || "",
               address,
               config,
