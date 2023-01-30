@@ -7,6 +7,7 @@ import { CollectionEvent } from "../entities/CollectionEvent";
 import { User } from "../entities/User";
 import { Message } from "../modules/kakaoMessage";
 import { CreateEntityData } from "../modules/manufactureData";
+import { OpenSea } from "../modules/requestAPI";
 
 // TODO 절대경로 생성
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
@@ -18,14 +19,12 @@ const headerConfig = {
 };
 const sendMessage = new Message();
 
-const createCollection = async (contractAddress: string) => {
+const createCollection = async (
+  contractAddress: string,
+  openSeaAPI: OpenSea
+) => {
   try {
-    const response = await axios.get(
-      `https://api.opensea.io/api/v1/asset_contract/${contractAddress}`,
-      headerConfig
-    );
-
-    const { status, data } = response;
+    const { status, data } = await openSeaAPI.getCollection();
 
     // request 오류 시 오류 리턴, 카카오톡으로 에러정보 전달
     if (status !== 200) {
@@ -33,11 +32,13 @@ const createCollection = async (contractAddress: string) => {
       return { isSuccess: false, collectionData: null };
     }
 
+    const { collection, address } = data;
+
     // 컬랙션 데이터 객체 생성
     const createEntityData = new CreateEntityData({
       snakeObject: {
-        ...data?.collection,
-        address: data?.address,
+        ...collection,
+        address: address,
       },
       entity: Collection,
     });
@@ -54,7 +55,7 @@ const createCollection = async (contractAddress: string) => {
   }
 };
 
-const createNFT = async (collectionData: Collection) => {
+const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
   try {
     let cursor = "";
     let page = 1;
@@ -63,20 +64,18 @@ const createNFT = async (collectionData: Collection) => {
       if (cursor === null) {
         return { isSuccess: true };
       }
-      const response = await axios.get(
-        `https://api.opensea.io/api/v1/assets?collection_slug=${collectionData.slug}&cursor=${cursor}`,
-        headerConfig
-      );
 
-      const {
-        status,
-        data: { next, assets },
-      } = response;
+      const { status, data } = await openSeaAPI.getNFTList(
+        collectionData,
+        cursor
+      );
 
       if (status !== 200) {
         sendMessage.nft(collectionData.address);
         return { isSuccess: false };
       }
+
+      const { next, assets } = data;
 
       cursor = next;
 
@@ -132,7 +131,7 @@ const createNFT = async (collectionData: Collection) => {
   }
 };
 
-const createEvent = async (collectionData: Collection) => {
+const createEvent = async (collectionData: Collection, openSeaAPI: OpenSea) => {
   try {
     let cursor = "";
     let page = 1;
@@ -142,20 +141,17 @@ const createEvent = async (collectionData: Collection) => {
         return { isSuccess: true };
       }
 
-      const response = await axios.get(
-        `https://api.opensea.io/api/v1/events?collection_slug=${collectionData.slug}&cursor=${cursor}`,
-        headerConfig
+      const { status, data } = await openSeaAPI.getEventList(
+        collectionData,
+        cursor
       );
-      const {
-        status,
-        data: { next, asset_events },
-      } = response;
 
-      // TODO request 오류 시 오류 내용 저장 필요
-      // TODO request 오류 시 카톡으로 내용 알리기
       if (status !== 200) {
+        sendMessage.event(collectionData.address);
         return { isSuccess: false };
       }
+
+      const { next, asset_events } = data;
 
       cursor = next;
 
@@ -176,10 +172,20 @@ const createEvent = async (collectionData: Collection) => {
 
         if (event?.asset?.token_id && !nftData) {
           // TODO NFT DATA 생성
-          console.log("NFT data 생성해야함.");
-        } else if (!event?.asset?.token_id) {
-          // event_type이 collection_offer인 경우
-          // TODO nft id 없이 저장하기
+
+          const res = await openSeaAPI.getNFT(
+            collectionData,
+            event?.asset?.token_id
+          );
+
+          if (res.status === 200) {
+            const createEntityData = new CreateEntityData({
+              snakeObject: res.data,
+              entity: NFT,
+            });
+            const nftData = createEntityData.createTableRowData();
+            await getRepository(NFT).save(nftData);
+          }
         }
 
         // NFT Entity 키값 리스트 얻기
@@ -204,8 +210,7 @@ const createEvent = async (collectionData: Collection) => {
 
         for (let j = 0; j < filterList.length; j++) {
           const accountType = filterList[j];
-          const accountData =
-            createEntityData.createTableRowData()[accountType];
+          const accountData = data[accountType];
           if (accountData) {
             let user = null;
 
@@ -242,7 +247,7 @@ const createEvent = async (collectionData: Collection) => {
         };
 
         await getRepository(CollectionEvent).save({
-          ...createEntityData.createTableRowData(),
+          ...data,
           collectionId: collectionData.id,
           nftId: nftData ? nftData.id : null,
           approvedAccount: getUserId("approvedAccount"),
@@ -256,6 +261,7 @@ const createEvent = async (collectionData: Collection) => {
       page += 1;
     }
   } catch (e) {
+    sendMessage.event(collectionData.address);
     return { isSuccess: false };
   }
 };
@@ -271,6 +277,8 @@ const CreateCollectionData = async (req: Request, res: Response) => {
     for (let i = 0; i < collectionList.length; i++) {
       const contractAddress = collectionList[i];
 
+      const openSeaAPI = new OpenSea(contractAddress);
+
       // 이미 수집된 컬랙션이 존재하면 카톡으로 알리고, 해당 컬랙션 수집 생략
       const existingCollectionData = (await getRepository(Collection).findOne({
         where: {
@@ -285,21 +293,27 @@ const CreateCollectionData = async (req: Request, res: Response) => {
 
       // Collection 데이터 생성
       const { isSuccess: isCollectionSuccess, collectionData } =
-        await createCollection(contractAddress);
+        await createCollection(contractAddress, openSeaAPI);
       if (!isCollectionSuccess) continue;
 
       // NFT 데이터 생성
-      const { isSuccess: isNFTSuccess } = await createNFT(collectionData);
+      const { isSuccess: isNFTSuccess } = await createNFT(
+        collectionData,
+        openSeaAPI
+      );
       if (!isNFTSuccess) return res.status(200).send({ success: false });
 
       // Event 데이터 생성
-      const { isSuccess: isEventSuccess } = await createEvent(collectionData);
+      const { isSuccess: isEventSuccess } = await createEvent(
+        collectionData,
+        openSeaAPI
+      );
       if (!isEventSuccess) return res.status(200).send({ success: false });
     }
 
-    return res.status(200).send({ success: true });
+    return res.status(200).json({ success: true });
   } catch (e: any) {
-    res.status(400).json({ success: false, message: e.message });
+    res.status(400).send({ success: false, message: e.message });
     throw new Error(e);
   }
 };

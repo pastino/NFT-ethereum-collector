@@ -13,9 +13,9 @@ const DeleteCollectionData = async (req: Request, res: Response) => {
       await getRepository(Collection).delete({ id: collectionId });
     }
 
-    return res.status(200).send({ success: true });
+    return res.status(200).json({ success: true });
   } catch (e: any) {
-    res.status(400).json({ success: false, message: e.message });
+    res.status(400).send({ success: false, message: e.message });
     throw new Error(e);
   }
 };
