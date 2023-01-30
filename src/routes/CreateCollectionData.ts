@@ -5,31 +5,29 @@ import { Collection } from "../entities/Collection";
 import { NFT } from "../entities/NFT";
 import { CollectionEvent } from "../entities/CollectionEvent";
 import { User } from "../entities/User";
-import { Message } from "../modules/kakaoMessage";
+import { Message, SendMessage } from "../modules/kakaoMessage";
 import { CreateEntityData } from "../modules/manufactureData";
 import { OpenSea } from "../modules/requestAPI";
-import { isAxiosError } from "../commons/utils";
+import moment from "moment";
 
 // TODO 절대경로 생성
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
 
-const headerConfig = {
-  headers: {
-    "X-API-KEY": process.env.OPENSEA_API_KEY as string,
-  },
-};
-const sendMessage = new Message();
+const message = new Message();
 
 const createCollection = async (
   contractAddress: string,
   openSeaAPI: OpenSea
-) => {
+): Promise<{
+  isSuccess: boolean;
+  collectionData: Collection | null;
+}> => {
   try {
     const { status, data } = await openSeaAPI.getCollection();
 
     // request 오류 시 오류 리턴, 카카오톡으로 에러정보 전달
     if (status !== 200) {
-      sendMessage.collection(contractAddress);
+      message.collection(contractAddress);
       return { isSuccess: false, collectionData: null };
     }
 
@@ -51,7 +49,7 @@ const createCollection = async (
 
     return { isSuccess: true, collectionData };
   } catch (e) {
-    sendMessage.collection(contractAddress);
+    message.collection(contractAddress);
     return { isSuccess: false, collectionData: null };
   }
 };
@@ -72,7 +70,7 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
       );
 
       if (status !== 200) {
-        sendMessage.nft(collectionData.address);
+        message.nft(collectionData.address);
         return { isSuccess: false };
       }
 
@@ -122,7 +120,7 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
       page += 1;
     }
   } catch (e: any) {
-    sendMessage.createNftError(collectionData.address, e?.message);
+    message.createNftError(collectionData.address, e?.message);
     return { isSuccess: false };
   }
 };
@@ -143,7 +141,7 @@ const createEvent = async (collectionData: Collection, openSeaAPI: OpenSea) => {
       );
 
       if (status !== 200) {
-        sendMessage.event(collectionData.address);
+        message.event(collectionData.address);
         return { isSuccess: false };
       }
 
@@ -257,7 +255,7 @@ const createEvent = async (collectionData: Collection, openSeaAPI: OpenSea) => {
       page += 1;
     }
   } catch (e) {
-    sendMessage.event(collectionData.address);
+    message.event(collectionData.address);
     return { isSuccess: false };
   }
 };
@@ -283,14 +281,14 @@ const CreateCollectionData = async (req: Request, res: Response) => {
       })) as Collection;
 
       if (existingCollectionData) {
-        sendMessage.alreadyCollected(contractAddress);
+        message.alreadyCollected(contractAddress);
         continue;
       }
 
       // Collection 데이터 생성
       const { isSuccess: isCollectionSuccess, collectionData } =
         await createCollection(contractAddress, openSeaAPI);
-      if (!isCollectionSuccess) continue;
+      if (!isCollectionSuccess || !collectionData) continue;
 
       // NFT 데이터 생성
       const { isSuccess: isNFTSuccess } = await createNFT(
@@ -305,6 +303,18 @@ const CreateCollectionData = async (req: Request, res: Response) => {
         openSeaAPI
       );
       if (!isEventSuccess) return res.status(200).send({ success: false });
+
+      const sendMessage = new SendMessage();
+
+      sendMessage.sendKakaoMessage({
+        object_type: "text",
+        text: `${moment(new Date()).format(
+          "MM/DD HH:mm"
+        )}\n\n<컬랙션 생성 완료 - ${i + 1}/${collectionList.length}>\n\n${
+          collectionData.name
+        } 컬랙션 데이터 생성이 완료되었습니다`,
+        link: { mobile_web_url: "", web_url: "" },
+      });
     }
 
     return res.status(200).json({ success: true });
