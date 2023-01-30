@@ -34,7 +34,6 @@ export class OpenSea {
       `https://api.opensea.io/api/v1/assets?collection_slug=${collectionData.slug}&cursor=${cursor}`,
       this.headerConfig
     );
-
     return response as {
       status: number;
       data: { assets: any[]; next: string };

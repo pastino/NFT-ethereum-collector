@@ -8,6 +8,7 @@ import { User } from "../entities/User";
 import { Message } from "../modules/kakaoMessage";
 import { CreateEntityData } from "../modules/manufactureData";
 import { OpenSea } from "../modules/requestAPI";
+import { isAxiosError } from "../commons/utils";
 
 // TODO 절대경로 생성
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
@@ -102,8 +103,8 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
 
           if (!existingUser) {
             await getRepository(User).save({
-              username,
-              profileImgUrl: profile_img_url,
+              username: username || "",
+              profileImgUrl: profile_img_url || "",
               address,
               config,
             });
@@ -125,8 +126,8 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
 
       page += 1;
     }
-  } catch (e) {
-    sendMessage.nft(collectionData.address);
+  } catch (e: any) {
+    sendMessage.createNftError(collectionData.address, e?.message);
     return { isSuccess: false };
   }
 };

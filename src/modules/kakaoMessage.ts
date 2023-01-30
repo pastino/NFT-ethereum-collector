@@ -55,6 +55,15 @@ export class Message {
   private deleteColectedData = async (contractAddress: string) => {
     await getRepository(Collection).delete({ address: contractAddress });
   };
+
+  public createNftError = (contractAddress: string, errorMessage: string) => {
+    this.deleteColectedData(contractAddress);
+    this.sendMessage(
+      `${moment(new Date()).format(
+        "MM/DD HH:mm"
+      )}\n\n<컬랙션 수집>\n\nError - ${errorMessage}\n\n해당 컬랙션에 대한 데이터는 모두 삭제 및 수집 생락하였습니다.\n\n주소 - ${contractAddress}`
+    );
+  };
 }
 
 export class SendMessage {
