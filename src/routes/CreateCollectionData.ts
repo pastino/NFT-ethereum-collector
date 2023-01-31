@@ -8,6 +8,9 @@ import { Message, SendMessage } from "../modules/kakaoMessage";
 import { CreateEntityData } from "../modules/manufactureData";
 import { OpenSea } from "../modules/requestAPI";
 import moment from "moment";
+import { IncompleteEventError } from "../entities/ IncompleteEventError";
+import { addHours, isAxiosError, sleep, subtractHours } from "../commons/utils";
+import { makeAxiosErrorText } from "../commons/error";
 
 // TODO 절대경로 생성
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
@@ -33,6 +36,7 @@ const createCollection = async (
         address: address,
       },
       entity: Collection,
+      filterList: ["id"],
     });
 
     // 컬랙션 데이터 Insert
@@ -92,6 +96,7 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
         const createEntityData = new CreateEntityData({
           snakeObject: asset,
           entity: NFT,
+          filterList: ["id"],
         });
 
         // NFT 데이터 Insert
@@ -109,134 +114,274 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
   }
 };
 
-const createEvent = async (collectionData: Collection, openSeaAPI: OpenSea) => {
-  try {
-    let cursor = "";
-    let page = 1;
+class Event {
+  private cursor: string = "";
+  private page: number = 1;
+  private occurredBefore: Date | null = null;
+  private isAlreadySavedEvent: boolean = false;
+  private collectionData: Collection;
+  private openSeaAPI: OpenSea;
+  private incompleteEventError: IncompleteEventError | undefined;
+  private retryCount = 0;
+  private MAX_RETRY_COUNT = 5;
 
-    while (true) {
-      if (cursor === null) {
-        return { isSuccess: true };
-      }
+  constructor({
+    collectionData,
+    openSeaAPI,
+    incompleteEventError,
+  }: {
+    collectionData: Collection;
+    openSeaAPI: OpenSea;
+    incompleteEventError?: IncompleteEventError;
+  }) {
+    this.collectionData = collectionData;
+    this.openSeaAPI = openSeaAPI;
+    this.incompleteEventError = incompleteEventError;
+  }
 
+  private checkDiscontinuedHistory = async () => {
+    if (this.incompleteEventError) {
+      const lastSavedEvent = await getRepository(CollectionEvent).findOne({
+        where: {
+          id: this.incompleteEventError.id,
+        },
+      });
+
+      if (!lastSavedEvent) return { isSuccess: false };
+
+      this.isAlreadySavedEvent = true;
+      this.occurredBefore = subtractHours(
+        new Date(lastSavedEvent?.eventTimestamp),
+        1
+      );
+    }
+  };
+
+  private getEventList = async () => {
+    try {
       const {
         data: { next, asset_events },
-      } = await openSeaAPI.getEventList(collectionData, cursor);
+      } = await this.openSeaAPI.getEventList({
+        collectionData: this.collectionData,
+        cursor: this.cursor,
+        occurredBefore: this.occurredBefore
+          ? this.occurredBefore
+          : addHours(new Date(), 1),
+      });
+      this.cursor = next;
+      return asset_events;
+    } catch (e: any) {
+      throw new Error(e.message);
+    }
+  };
 
-      cursor = next;
+  private checkHasNFTAndCreate = async (event: any) => {
+    let nftData = await getRepository(NFT).findOne({
+      where: {
+        collectionId: this.collectionData.id,
+        tokenId: event?.asset?.token_id,
+      },
+    });
 
-      // Event 데이터들을 저장한다
-      for (let i = 0; i < asset_events.length; i++) {
-        console.log(
-          `<Event 생성> ${page}번째 페이지의 ${i + 1}/${
-            asset_events.length
-          } Event 입니다`
+    if (event?.asset?.token_id && !nftData) {
+      // NFT DATA 생성
+      try {
+        const res = await this.openSeaAPI.getNFT(
+          this.collectionData,
+          event?.asset?.token_id
         );
-        const event = asset_events[i];
-        let nftData = await getRepository(NFT).findOne({
+
+        const createEntityData = new CreateEntityData({
+          snakeObject: res.data,
+          entity: NFT,
+          filterList: ["id"],
+        });
+
+        nftData = await getRepository(NFT).save(
+          createEntityData.createTableRowData()
+        );
+      } catch (e: unknown) {
+        if (isAxiosError(e)) {
+          throw new Error(makeAxiosErrorText(e));
+        }
+      }
+    }
+    return nftData;
+  };
+
+  private makeDataForInsertToDB = async (event: any) => {
+    // 이벤트 데이터 객체 생성
+    const createEntityData = new CreateEntityData({
+      snakeObject: event,
+      entity: CollectionEvent,
+    });
+    const makedDataForInsert = createEntityData.createTableRowData();
+    return makedDataForInsert;
+  };
+
+  private getUserData = async (
+    data: any
+  ): Promise<{ accountType: string; user: User }[]> => {
+    try {
+      const hasDataListOfAccountData: { accountType: string; user: User }[] =
+        [];
+
+      // NFT Entity 키값 리스트 얻기
+      const filterList = [
+        "approvedAccount",
+        "ownerAccount",
+        "fromAccount",
+        "seller",
+        "toAccount",
+        "winnerAccount",
+      ];
+
+      for (let j = 0; j < filterList.length; j++) {
+        const accountType = filterList[j];
+        const accountData = data[accountType];
+        if (accountData) {
+          let user = null;
+
+          user = await getRepository(User).findOne({
+            where: {
+              address: accountData?.address,
+            },
+          });
+
+          if (user) {
+            hasDataListOfAccountData.push({ accountType, user });
+            continue;
+          }
+
+          user = await getRepository(User).save({
+            user: accountData?.user?.username || "",
+            profileImgUrl: accountData?.profile_img_url || "",
+            address: accountData?.address || "",
+            config: accountData?.config || "",
+          });
+          hasDataListOfAccountData.push({ accountType, user });
+        }
+      }
+
+      return hasDataListOfAccountData;
+    } catch (e) {
+      if (isAxiosError(e)) {
+        throw new Error(makeAxiosErrorText(e));
+      }
+      return [];
+    }
+  };
+
+  private insertEventList = async (assetEvents: any[]) => {
+    for (let i = 0; i < assetEvents.length; i++) {
+      console.log(
+        `<Event 생성> ${this.page}번째 페이지의 ${i + 1}/${
+          assetEvents.length
+        } Event 입니다`
+      );
+
+      const event = assetEvents[i];
+
+      if (this.occurredBefore && this.isAlreadySavedEvent) {
+        const existingEvent = await getRepository(CollectionEvent).findOne({
           where: {
-            collectionId: collectionData.id,
-            tokenId: event?.asset?.token_id,
+            eventId: event.id,
           },
         });
 
-        if (event?.asset?.token_id && !nftData) {
-          // TODO NFT DATA 생성
-
-          const res = await openSeaAPI.getNFT(
-            collectionData,
-            event?.asset?.token_id
-          );
-
-          if (res.status === 200) {
-            const createEntityData = new CreateEntityData({
-              snakeObject: res.data,
-              entity: NFT,
-            });
-            const nftData = createEntityData.createTableRowData();
-            await getRepository(NFT).save(nftData);
-          }
+        // 종료되었던 이벤트 데이터 저장 중 - 이미 저장된 이벤트는 생략
+        if (existingEvent) {
+          this.isAlreadySavedEvent = true;
+          continue;
+        } else {
+          /* 종료되었던 이벤트 데이터 저장 중 - 
+          저장되지 않았으면 isAlreadySavedEvent를 false로 변경하여 
+          이벤트가 존재하는지 추가로 확인하지 않는다.
+          */
+          this.isAlreadySavedEvent = false;
         }
-
-        // NFT Entity 키값 리스트 얻기
-        const filterList = [
-          "approvedAccount",
-          "ownerAccount",
-          "fromAccount",
-          "seller",
-          "toAccount",
-          "winnerAccount",
-        ];
-
-        // 이벤트 데이터 객체 생성
-        const createEntityData = new CreateEntityData({
-          snakeObject: event,
-          entity: CollectionEvent,
-        });
-        const data = createEntityData.createTableRowData();
-
-        const hasDataListOfAccountData: { accountType: string; user: User }[] =
-          [];
-
-        for (let j = 0; j < filterList.length; j++) {
-          const accountType = filterList[j];
-          const accountData = data[accountType];
-          if (accountData) {
-            let user = null;
-
-            user = await getRepository(User).findOne({
-              where: {
-                address: accountData?.address,
-              },
-            });
-
-            if (user) {
-              hasDataListOfAccountData.push({ accountType, user });
-              continue;
-            }
-
-            user = await getRepository(User).save({
-              user: accountData?.user?.username || "",
-              profileImgUrl: accountData?.profile_img_url || "",
-              address: accountData?.address || "",
-              config: accountData?.config || "",
-            });
-            hasDataListOfAccountData.push({ accountType, user });
-          }
-        }
-
-        const getUserId = (targetKey: string) => {
-          const isInclude = hasDataListOfAccountData
-            .map((item) => item.accountType)
-            .includes(targetKey);
-          if (!isInclude) return null;
-
-          return hasDataListOfAccountData.find(
-            (item) => item.accountType === targetKey
-          )?.user.id;
-        };
-
-        await getRepository(CollectionEvent).save({
-          ...data,
-          collectionId: collectionData.id,
-          nftId: nftData ? nftData.id : null,
-          approvedAccount: getUserId("approvedAccount"),
-          ownerAccount: getUserId("ownerAccount"),
-          fromAccount: getUserId("fromAccount"),
-          seller: getUserId("seller"),
-          toAccount: getUserId("toAccount"),
-          winnerAccount: getUserId("winnerAccount"),
-        });
       }
-      page += 1;
-    }
-  } catch (e: any) {
-    message.deleteColectedData(collectionData.address);
-    throw new Error(e.message);
-  }
-};
 
-const CreateCollectionData = async (req: Request, res: Response) => {
+      const nftData = await this.checkHasNFTAndCreate(event);
+      const makedDataForInsert = await this.makeDataForInsertToDB(event);
+
+      const hasDataListOfAccountData = await this.getUserData(
+        makedDataForInsert
+      );
+
+      const getUserId = (targetKey: string) => {
+        const isInclude = hasDataListOfAccountData
+          .map((item) => item.accountType)
+          .includes(targetKey);
+        if (!isInclude) return null;
+
+        return hasDataListOfAccountData.find(
+          (item) => item.accountType === targetKey
+        )?.user.id;
+      };
+
+      await getRepository(CollectionEvent).save({
+        ...makedDataForInsert,
+        eventId: makedDataForInsert.id,
+        collectionId: this.collectionData.id,
+        nftId: nftData ? nftData.id : null,
+        approvedAccount: getUserId("approvedAccount"),
+        ownerAccount: getUserId("ownerAccount"),
+        fromAccount: getUserId("fromAccount"),
+        seller: getUserId("seller"),
+        toAccount: getUserId("toAccount"),
+        winnerAccount: getUserId("winnerAccount"),
+      });
+    }
+  };
+
+  public createEventList = async () => {
+    try {
+      // 이전에 이벤트 데이터 쌓는 도중 오류로 인해 중단된 기록있는지 확인.
+      // 있다면 occurredBefore 상태값 업데이트
+      this.checkDiscontinuedHistory();
+
+      // 이벤트 데이터 쌓기 시작
+      while (true) {
+        // cursor가 null이면 다음 페이지 없음 - while문 종료.
+        if (this.cursor === null) {
+          return { isSuccess: true };
+        }
+
+        // 이벤트 데이터 리스트 가져오기
+        const assetEvents = await this.getEventList();
+
+        // 이벤트 데이터 저장
+        this.insertEventList(assetEvents);
+      }
+    } catch (e) {
+      if (isAxiosError(e)) {
+        const code = e.response?.status;
+        if (
+          typeof code === "number" &&
+          code >= 500 &&
+          this.retryCount < this.MAX_RETRY_COUNT
+        ) {
+          this.retryCount++;
+          // 10분간 정지 - opensea api 오버 트래픽 방지
+          await sleep(60 * 10);
+
+          await sendMessage.sendKakaoMessage({
+            object_type: "text",
+            text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 이벤트 시점부터 다시 수집을 시작합니다. (${this.retryCount}/${this.MAX_RETRY_COUNT})`,
+            link: { mobile_web_url: "", web_url: "" },
+          });
+
+          await this.createEventList();
+        } else {
+          throw new Error(e.message);
+        }
+      }
+    }
+  };
+}
+
+const createCollectionData = async (req: Request, res: Response) => {
   try {
     // TODO 생성 중간 단계에 계속 카톡을 준다.
     // TODO 생성이 완료되면 카톡을 준다.
@@ -257,6 +402,27 @@ const CreateCollectionData = async (req: Request, res: Response) => {
       })) as Collection;
 
       if (existingCollectionData) {
+        // Data 수집 중 에러로 인하여 종료된 컬랙션인지 확인
+        const incompleteEventError = await getRepository(
+          IncompleteEventError
+        ).findOne({
+          where: {
+            collectionId: existingCollectionData.id,
+          },
+          order: {
+            createAt: "DESC",
+          },
+        });
+
+        if (incompleteEventError) {
+          const event = new Event({
+            collectionData: existingCollectionData,
+            openSeaAPI,
+            incompleteEventError,
+          });
+          await event.createEventList();
+        }
+
         message.alreadyCollected(contractAddress);
         continue;
       }
@@ -277,11 +443,11 @@ const CreateCollectionData = async (req: Request, res: Response) => {
       if (!isNFTSuccess) return res.status(200).send({ success: false });
 
       // Event 데이터 생성
-      const { isSuccess: isEventSuccess } = await createEvent(
+      const event = new Event({
         collectionData,
-        openSeaAPI
-      );
-      if (!isEventSuccess) return res.status(200).send({ success: false });
+        openSeaAPI,
+      });
+      await event.createEventList();
 
       await sendMessage.sendKakaoMessage({
         object_type: "text",
@@ -309,4 +475,4 @@ const CreateCollectionData = async (req: Request, res: Response) => {
   }
 };
 
-export default CreateCollectionData;
+export default createCollectionData;

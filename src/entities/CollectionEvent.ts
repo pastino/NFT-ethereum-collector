@@ -15,6 +15,9 @@ export class CollectionEvent {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true })
+  eventId: number;
+
   @Column({ type: "int", nullable: true })
   @ManyToOne(() => NFT, (nft) => nft.id, {
     onDelete: "CASCADE",
