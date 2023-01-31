@@ -29,40 +29,8 @@ export class Message {
     );
   };
 
-  public collection = (contractAddress: string) => {
-    this.sendMessage(
-      `${moment(new Date()).format(
-        "MM/DD HH:mm"
-      )}\n\n<컬랙션 수집>\n\nError - 오픈시 API 전송에 실파하였습니다.\nn컬랙션 데이터 get 전송에 실파하였습니다.\n\n해당 컬랙션 데이터 수집은 생략하였습니다.\n\n주소 - ${contractAddress}`
-    );
-  };
-  public nft = (contractAddress: string) => {
-    this.deleteColectedData(contractAddress);
-    this.sendMessage(
-      `${moment(new Date()).format(
-        "MM/DD HH:mm"
-      )}\n\n<컬랙션 수집>\n\nError - 오픈시 API 전송에 실파하였습니다.\n\nNFT 데이터 get 전송에 실파하였습니다.\n\n해당 컬랙션에 대한 데이터는 모두 삭제 및 수집 생락하였습니다.\n\n주소 - ${contractAddress}`
-    );
-  };
-  public event = (contractAddress: string) => {
-    this.deleteColectedData(contractAddress);
-    this.sendMessage(
-      `${moment(new Date()).format(
-        "MM/DD HH:mm"
-      )}\n\n<컬랙션 수집>\n\nError - 오픈시 API 전송에 실파하였습니다.\nn이벤트 데이터 get 전송에 실파하였습니다.\n\n해당 컬랙션에 대한 데이터는 모두 삭제 및 수집 생락하였습니다.\n\n주소 - ${contractAddress}`
-    );
-  };
-  private deleteColectedData = async (contractAddress: string) => {
+  public deleteColectedData = async (contractAddress: string) => {
     await getRepository(Collection).delete({ address: contractAddress });
-  };
-
-  public createNftError = (contractAddress: string, errorMessage: string) => {
-    this.deleteColectedData(contractAddress);
-    this.sendMessage(
-      `${moment(new Date()).format(
-        "MM/DD HH:mm"
-      )}\n\n<컬랙션 수집>\n\nError - ${errorMessage}\n\n해당 컬랙션에 대한 데이터는 모두 삭제 및 수집 생락하였습니다.\n\n주소 - ${contractAddress}`
-    );
   };
 }
 
@@ -128,17 +96,14 @@ export class SendMessage {
     // TODO 카카오 메세지 전송이 불가피한 경우 이메일 전송하도록 처리
     if (!tokenData) return;
     const isExpired = this.isTokenExpired(tokenData);
-
     if (isExpired) {
       await this.createNewToken(tokenData);
       tokenData = await this.getKakaoToken();
       // TODO 이메일 전송
       if (!tokenData) return;
     }
-
     try {
       const { accessToken } = tokenData;
-
       const response = await axios({
         method: "post",
         url: `https://kapi.kakao.com/v2/api/talk/memo/default/send`,
@@ -150,13 +115,13 @@ export class SendMessage {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
       const resultCode = response?.data?.result_code;
 
       if (resultCode === 0) {
-        console.log("성공");
+        console.log("카카오 메세지 전송");
       }
     } catch (e: unknown) {
+      console.log("e", e);
       if (isAxiosError(e)) {
         if (e?.response?.data?.code === -401) {
           console.log("토큰 만료 유효성 검사 수정");

@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
-import axios from "axios";
 import { Collection } from "../entities/Collection";
 import { NFT } from "../entities/NFT";
 import { CollectionEvent } from "../entities/CollectionEvent";
@@ -14,24 +13,18 @@ import moment from "moment";
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
 
 const message = new Message();
+const sendMessage = new SendMessage();
 
 const createCollection = async (
-  contractAddress: string,
   openSeaAPI: OpenSea
 ): Promise<{
   isSuccess: boolean;
   collectionData: Collection | null;
 }> => {
   try {
-    const { status, data } = await openSeaAPI.getCollection();
-
-    // request 오류 시 오류 리턴, 카카오톡으로 에러정보 전달
-    if (status !== 200) {
-      message.collection(contractAddress);
-      return { isSuccess: false, collectionData: null };
-    }
-
-    const { collection, address } = data;
+    const {
+      data: { collection, address },
+    } = await openSeaAPI.getCollection();
 
     // 컬랙션 데이터 객체 생성
     const createEntityData = new CreateEntityData({
@@ -48,9 +41,8 @@ const createCollection = async (
     );
 
     return { isSuccess: true, collectionData };
-  } catch (e) {
-    message.collection(contractAddress);
-    return { isSuccess: false, collectionData: null };
+  } catch (e: any) {
+    throw new Error(e.message);
   }
 };
 
@@ -64,17 +56,9 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
         return { isSuccess: true };
       }
 
-      const { status, data } = await openSeaAPI.getNFTList(
-        collectionData,
-        cursor
-      );
-
-      if (status !== 200) {
-        message.nft(collectionData.address);
-        return { isSuccess: false };
-      }
-
-      const { next, assets } = data;
+      const {
+        data: { next, assets },
+      } = await openSeaAPI.getNFTList(collectionData, cursor);
 
       cursor = next;
 
@@ -120,8 +104,8 @@ const createNFT = async (collectionData: Collection, openSeaAPI: OpenSea) => {
       page += 1;
     }
   } catch (e: any) {
-    message.createNftError(collectionData.address, e?.message);
-    return { isSuccess: false };
+    message.deleteColectedData(collectionData.address);
+    throw new Error(e.message);
   }
 };
 
@@ -135,17 +119,9 @@ const createEvent = async (collectionData: Collection, openSeaAPI: OpenSea) => {
         return { isSuccess: true };
       }
 
-      const { status, data } = await openSeaAPI.getEventList(
-        collectionData,
-        cursor
-      );
-
-      if (status !== 200) {
-        message.event(collectionData.address);
-        return { isSuccess: false };
-      }
-
-      const { next, asset_events } = data;
+      const {
+        data: { next, asset_events },
+      } = await openSeaAPI.getEventList(collectionData, cursor);
 
       cursor = next;
 
@@ -254,9 +230,9 @@ const createEvent = async (collectionData: Collection, openSeaAPI: OpenSea) => {
       }
       page += 1;
     }
-  } catch (e) {
-    message.event(collectionData.address);
-    return { isSuccess: false };
+  } catch (e: any) {
+    message.deleteColectedData(collectionData.address);
+    throw new Error(e.message);
   }
 };
 
@@ -287,8 +263,11 @@ const CreateCollectionData = async (req: Request, res: Response) => {
 
       // Collection 데이터 생성
       const { isSuccess: isCollectionSuccess, collectionData } =
-        await createCollection(contractAddress, openSeaAPI);
-      if (!isCollectionSuccess || !collectionData) continue;
+        await createCollection(openSeaAPI);
+      if (!isCollectionSuccess || !collectionData) {
+        // TODO 해당 컬랙션 생략한다는 메세지 보내기
+        continue;
+      }
 
       // NFT 데이터 생성
       const { isSuccess: isNFTSuccess } = await createNFT(
@@ -304,9 +283,7 @@ const CreateCollectionData = async (req: Request, res: Response) => {
       );
       if (!isEventSuccess) return res.status(200).send({ success: false });
 
-      const sendMessage = new SendMessage();
-
-      sendMessage.sendKakaoMessage({
+      await sendMessage.sendKakaoMessage({
         object_type: "text",
         text: `${moment(new Date()).format(
           "MM/DD HH:mm"
@@ -319,8 +296,16 @@ const CreateCollectionData = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true });
   } catch (e: any) {
+    console.log(e.message);
+    sendMessage.sendKakaoMessage({
+      object_type: "text",
+      text: e.message,
+      link: {
+        mobile_web_url: "",
+        web_url: "",
+      },
+    });
     res.status(400).send({ success: false, message: e.message });
-    throw new Error(e);
   }
 };
 
