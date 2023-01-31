@@ -29,11 +29,8 @@ app.delete("/collection", DeleteCollectionData);
 app.post("/kakao/auth", KakaoAuthorization);
 
 // const sampleTest = async () => {
-//   const count = await getRepository(CollectionEvent).count();
-//   console.log("count", count);
-// };
 
-// 133060
+// };
 
 createConnection(connectionOptions)
   .then(() => {

@@ -1,4 +1,6 @@
 import axios from "axios";
+import { ERROR_STATUS_CODE } from "../commons/errorCode";
+import { isAxiosError } from "../commons/utils";
 
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
 export class OpenSea {
@@ -16,51 +18,117 @@ export class OpenSea {
   }
 
   public getCollection = async () => {
-    const response = await axios.get(
-      `https://api.opensea.io/api/v1/asset_contract/${this.contractAddress}`,
-      this.headerConfig
+    try {
+      const response = await axios.get(
+        `https://api.opensea.io/api/v1/asset_contract/${this.contractAddress}`,
+        this.headerConfig
+      );
+
+      this.collectionData = response?.data?.collection;
+
+      return response as {
+        status: number;
+        data: { collection: {}; address: string };
+      };
+    } catch (e: unknown) {
+      if (isAxiosError(e)) {
+        throw new Error(
+          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
+            e.response?.data
+          }\n\n*statusText*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].statusText
+          }\n\n*statusDescription*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].description
+          }`
+        );
+      }
+    }
+    throw new Error(
+      "getCollection 함수를 실행하는 중 런타임 에러가 발생하였습니다."
     );
-
-    this.collectionData = response?.data?.collection;
-
-    return response as {
-      status: number;
-      data: { collection: {}; address: string };
-    };
   };
 
   public getNFTList = async (collectionData: any, cursor: string) => {
-    const response = await axios.get(
-      `https://api.opensea.io/api/v1/assets?collection_slug=${collectionData.slug}&cursor=${cursor}`,
-      this.headerConfig
+    try {
+      const response = await axios.get(
+        `https://api.opensea.io/api/v1/assets?collection_slug=${collectionData.slug}&cursor=${cursor}`,
+        this.headerConfig
+      );
+      return response as {
+        status: number;
+        data: { assets: any[]; next: string };
+      };
+    } catch (e: unknown) {
+      if (isAxiosError(e)) {
+        throw new Error(
+          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
+            e.response?.data
+          }\n\n*statusText*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].statusText
+          }\n\n*statusDescription*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].description
+          }`
+        );
+      }
+    }
+    throw new Error(
+      "getNFTList 함수를 실행하는 중 런타임 에러가 발생하였습니다."
     );
-    return response as {
-      status: number;
-      data: { assets: any[]; next: string };
-    };
   };
 
   public getNFT = async (collectionData: any, tokenId: string) => {
-    const response = await axios.get(
-      `https://api.opensea.io/api/v1/asset/${collectionData.address}/${tokenId}`,
-      this.headerConfig
-    );
+    try {
+      const response = await axios.get(
+        `https://api.opensea.io/api/v1/asset/${collectionData.address}/${tokenId}`,
+        this.headerConfig
+      );
 
-    return response as {
-      status: number;
-      data: any;
-    };
+      return response as {
+        status: number;
+        data: any;
+      };
+    } catch (e) {
+      if (isAxiosError(e)) {
+        throw new Error(
+          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
+            e.response?.data
+          }\n\n*statusText*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].statusText
+          }\n\n*statusDescription*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].description
+          }`
+        );
+      }
+    }
+    throw new Error("getNFT 함수를 실행하는 중 런타임 에러가 발생하였습니다.");
   };
 
   public getEventList = async (collectionData: any, cursor: string) => {
-    const response = await axios.get(
-      `https://api.opensea.io/api/v1/events?collection_slug=${collectionData.slug}&cursor=${cursor}`,
-      this.headerConfig
-    );
+    try {
+      const response = await axios.get(
+        `https://api.opensea.io/api/v1/events?collection_slug=${collectionData.slug}&cursor=${cursor}`,
+        this.headerConfig
+      );
 
-    return response as {
-      status: number;
-      data: { asset_events: any[]; next: string };
-    };
+      return response as {
+        status: number;
+        data: { asset_events: any[]; next: string };
+      };
+    } catch (e) {
+      if (isAxiosError(e)) {
+        throw new Error(
+          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
+            e.response?.data
+          }\n\n*statusText*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].statusText
+          }\n\n*statusDescription*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].description
+          }`
+        );
+      }
+    }
+    throw new Error(
+      "getEventList 함수를 실행하는 중 런타임 에러가 발생하였습니다."
+    );
   };
 }
