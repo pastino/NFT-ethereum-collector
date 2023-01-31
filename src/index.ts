@@ -27,16 +27,11 @@ app.post("/collection", createCollectionData);
 app.delete("/collection", deleteCollectionData);
 app.post("/kakao/auth", kakaoAuthorization);
 
-// const sampleTest = async () => {
-
-// };
-
 createConnection(connectionOptions)
   .then(() => {
     console.log("DB CONNECTION!");
     app.listen(PORT, () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      // sampleTest();
     });
   })
   .catch((error) => {
