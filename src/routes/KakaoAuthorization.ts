@@ -6,7 +6,7 @@ import { KakaoAccessToken } from "../entities/KakaoAccessToken";
 import { isAxiosError } from "../commons/utils";
 import { SendMessage } from "../modules/kakaoMessage";
 
-const KakaoAuthorization = async (req: Request, res: Response) => {
+const kakaoAuthorization = async (req: Request, res: Response) => {
   try {
     const {
       body: { code, redirectUri },
@@ -29,6 +29,7 @@ const KakaoAuthorization = async (req: Request, res: Response) => {
     const createEntityData = new CreateEntityData({
       snakeObject: response?.data,
       entity: KakaoAccessToken,
+      filterList: ["id"],
     });
 
     const repository = await getRepository(KakaoAccessToken);
@@ -60,4 +61,4 @@ const KakaoAuthorization = async (req: Request, res: Response) => {
   }
 };
 
-export default KakaoAuthorization;
+export default kakaoAuthorization;

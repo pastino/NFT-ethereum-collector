@@ -1,3 +1,15 @@
+import { AxiosError } from "axios";
+
+export const makeAxiosErrorText = (e: AxiosError) => {
+  return `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
+    e.response?.data
+  }\n\n*statusText*\n${
+    ERROR_STATUS_CODE[e.response?.status as number].statusText
+  }\n\n*statusDescription*\n${
+    ERROR_STATUS_CODE[e.response?.status as number].description
+  }`;
+};
+
 export const ERROR_STATUS_CODE: {
   [code: number]: {
     statusText: string;

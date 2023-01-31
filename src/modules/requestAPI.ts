@@ -1,6 +1,11 @@
 import axios from "axios";
-import { ERROR_STATUS_CODE } from "../commons/errorCode";
+import { getRepository } from "typeorm";
+import { makeAxiosErrorText } from "../commons/error";
+import { ERROR_STATUS_CODE } from "../commons/error";
 import { isAxiosError } from "../commons/utils";
+import { IncompleteEventError } from "../entities/ IncompleteEventError";
+import { Collection } from "../entities/Collection";
+import { CollectionEvent } from "../entities/CollectionEvent";
 
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
 export class OpenSea {
@@ -60,15 +65,7 @@ export class OpenSea {
       };
     } catch (e: unknown) {
       if (isAxiosError(e)) {
-        throw new Error(
-          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
-            e.response?.data
-          }\n\n*statusText*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].statusText
-          }\n\n*statusDescription*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].description
-          }`
-        );
+        throw new Error(makeAxiosErrorText(e));
       }
     }
     throw new Error(
@@ -89,24 +86,42 @@ export class OpenSea {
       };
     } catch (e) {
       if (isAxiosError(e)) {
-        throw new Error(
-          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
-            e.response?.data
-          }\n\n*statusText*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].statusText
-          }\n\n*statusDescription*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].description
-          }`
-        );
+        throw new Error(makeAxiosErrorText(e));
       }
     }
     throw new Error("getNFT 함수를 실행하는 중 런타임 에러가 발생하였습니다.");
   };
 
-  public getEventList = async (collectionData: any, cursor: string) => {
+  private makeEventErrorRecord = async (collectionId: number) => {
+    const lastEventData = await getRepository(CollectionEvent).findOne({
+      where: {
+        collectionId: collectionId,
+      },
+      order: {
+        createAt: "DESC",
+      },
+    });
+
+    if (lastEventData) {
+      await getRepository(IncompleteEventError).save({
+        collectionId: collectionId,
+        collectionEventId: lastEventData.id,
+      });
+    }
+  };
+
+  public getEventList = async ({
+    collectionData,
+    cursor,
+    occurredBefore,
+  }: {
+    collectionData: Collection;
+    cursor: string;
+    occurredBefore?: Date | null;
+  }) => {
     try {
       const response = await axios.get(
-        `https://api.opensea.io/api/v1/events?collection_slug=${collectionData.slug}&cursor=${cursor}`,
+        `https://api.opensea.io/api/v1/events?collection_slug=${collectionData.slug}&occurred_before=${occurredBefore}&cursor=${cursor}`,
         this.headerConfig
       );
 
@@ -115,20 +130,13 @@ export class OpenSea {
         data: { asset_events: any[]; next: string };
       };
     } catch (e) {
+      await this.makeEventErrorRecord(collectionData.id);
       if (isAxiosError(e)) {
-        throw new Error(
-          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
-            e.response?.data
-          }\n\n*statusText*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].statusText
-          }\n\n*statusDescription*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].description
-          }`
-        );
+        throw new Error(makeAxiosErrorText(e));
       }
+      throw new Error(
+        "getEventList 함수를 실행하는 중 런타임 에러가 발생하였습니다."
+      );
     }
-    throw new Error(
-      "getEventList 함수를 실행하는 중 런타임 에러가 발생하였습니다."
-    );
   };
 }

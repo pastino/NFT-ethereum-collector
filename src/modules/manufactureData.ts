@@ -4,7 +4,7 @@ import { getConnection } from "typeorm";
 export class CreateEntityData {
   private snakeObject = {};
   private entity = {};
-  private filterList = [];
+  private filterList;
 
   constructor({
     snakeObject,
@@ -13,11 +13,11 @@ export class CreateEntityData {
   }: {
     snakeObject: {};
     entity: {};
-    filterList?: [];
+    filterList?: string[] | [];
   }) {
     this.snakeObject = snakeObject;
     this.entity = entity;
-    this.filterList = filterList || [];
+    this.filterList = filterList;
   }
 
   // response 데이터 snake case 키값을 camel case로 변경
@@ -30,7 +30,7 @@ export class CreateEntityData {
     const keyList = Object.keys(
       getConnection().getRepository(this.entity as never).metadata.propertiesMap
     );
-    const basicFilterList = ["id", "createAt", "updateAt"];
+    const basicFilterList = ["createAt", "updateAt"];
     return keyList.filter(
       (key) => ![...basicFilterList, ...(this.filterList || [])]?.includes(key)
     );
