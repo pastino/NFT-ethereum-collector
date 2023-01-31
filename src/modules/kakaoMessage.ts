@@ -84,8 +84,9 @@ export class SendMessage {
 
     const passedTimeSecond = (currentTimeStamp - createdTimeStamp) / 1000;
     const expiredTimeSecond = tokenData?.expiresIn;
+    const safetyMarginSecond = 60 * 10;
 
-    const isExpired = passedTimeSecond > expiredTimeSecond;
+    const isExpired = passedTimeSecond > expiredTimeSecond - safetyMarginSecond;
 
     if (isExpired) return true;
     return false;
@@ -122,16 +123,21 @@ export class SendMessage {
   public sendKakaoMessage = async (
     kakaoTemplateObject: TextTypeKakaoTemplate | FeedTypeKakaoTemplate
   ) => {
-    const tokenData = await this.getKakaoToken();
+    let tokenData = await this.getKakaoToken();
+
+    // TODO 카카오 메세지 전송이 불가피한 경우 이메일 전송하도록 처리
     if (!tokenData) return;
     const isExpired = this.isTokenExpired(tokenData);
 
     if (isExpired) {
-      this.createNewToken(tokenData);
+      await this.createNewToken(tokenData);
+      tokenData = await this.getKakaoToken();
+      // TODO 이메일 전송
+      if (!tokenData) return;
     }
 
     try {
-      const { accessToken } = (await this.getKakaoToken()) as KakaoAccessToken;
+      const { accessToken } = tokenData;
 
       const response = await axios({
         method: "post",
