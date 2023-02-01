@@ -135,7 +135,8 @@ export class OpenSea {
       };
     } catch (e: any) {
       await this.makeEventErrorRecord(collectionData.id);
-
+      console.log(e);
+      console.log(e.message);
       if (isAxiosError(e)) {
         throw new Error(JSON.stringify(makeAxiosErrorJson(e)));
       }
