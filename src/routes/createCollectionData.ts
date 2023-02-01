@@ -342,7 +342,7 @@ class Event {
     try {
       // 이전에 이벤트 데이터 쌓는 도중 오류로 인해 중단된 기록있는지 확인.
       // 있다면 occurredBefore 상태값 업데이트
-      this.checkDiscontinuedHistory();
+      await this.checkDiscontinuedHistory();
       // 이벤트 데이터 쌓기 시작
       while (true) {
         // cursor가 null이면 다음 페이지 없음 - while문 종료.
@@ -352,7 +352,7 @@ class Event {
         // 이벤트 데이터 리스트 가져오기
         const assetEvents = await this.getEventList();
         // 이벤트 데이터 저장
-        this.insertEventList(assetEvents);
+        await this.insertEventList(assetEvents);
       }
     } catch (e: any) {
       console.log("500 에러 발생");
