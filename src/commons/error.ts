@@ -10,6 +10,16 @@ export const makeAxiosErrorText = (e: AxiosError) => {
   }`;
 };
 
+export const makeAxiosErrorJson = (e: AxiosError) => {
+  return {
+    status: e.response?.status,
+    data: JSON.stringify(e.response?.data),
+    statusText: ERROR_STATUS_CODE[e.response?.status as number].statusText,
+    description: ERROR_STATUS_CODE[e.response?.status as number].description,
+    message: makeAxiosErrorText(e),
+  };
+};
+
 export const ERROR_STATUS_CODE: {
   [code: number]: {
     statusText: string;

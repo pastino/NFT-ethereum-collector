@@ -171,7 +171,7 @@ class Event {
       this.cursor = next;
       return asset_events;
     } catch (e: any) {
-      throw new Error(e.message);
+      throw new Error(e);
     }
   };
 
@@ -319,10 +319,12 @@ class Event {
           (item) => item.accountType === targetKey
         )?.user.id;
       };
+      const eventId = makedDataForInsert.id;
+      delete makedDataForInsert.id;
 
       await getRepository(CollectionEvent).save({
         ...makedDataForInsert,
-        eventId: makedDataForInsert.id,
+        eventId: eventId,
         collectionId: this.collectionData.id,
         nftId: nftData ? nftData.id : null,
         approvedAccount: getUserId("approvedAccount"),
@@ -340,23 +342,21 @@ class Event {
       // 이전에 이벤트 데이터 쌓는 도중 오류로 인해 중단된 기록있는지 확인.
       // 있다면 occurredBefore 상태값 업데이트
       this.checkDiscontinuedHistory();
-
       // 이벤트 데이터 쌓기 시작
       while (true) {
         // cursor가 null이면 다음 페이지 없음 - while문 종료.
         if (this.cursor === null) {
           return { isSuccess: true };
         }
-
         // 이벤트 데이터 리스트 가져오기
         const assetEvents = await this.getEventList();
-
         // 이벤트 데이터 저장
         this.insertEventList(assetEvents);
       }
-    } catch (e) {
-      if (isAxiosError(e)) {
-        const code = e.response?.status;
+    } catch (e: any) {
+      if (typeof JSON.parse(JSON.stringify(e)) === "object") {
+        const response = JSON.parse(JSON.stringify(e));
+        const code = response?.status;
         if (
           typeof code === "number" &&
           code >= 500 &&
@@ -371,15 +371,54 @@ class Event {
             text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 이벤트 시점부터 다시 수집을 시작합니다. (${this.retryCount}/${this.MAX_RETRY_COUNT})`,
             link: { mobile_web_url: "", web_url: "" },
           });
-
           await this.createEventList();
         } else {
           throw new Error(e.message);
         }
       }
+      throw new Error(e);
     }
   };
 }
+
+const alreadyCollected = async (
+  contractAddress: string,
+  openSeaAPI: OpenSea
+) => {
+  const existingCollectionData = (await getRepository(Collection).findOne({
+    where: {
+      address: contractAddress,
+    },
+  })) as Collection;
+
+  if (existingCollectionData) {
+    // Data 수집 중 에러로 인하여 종료된 컬랙션인지 확인
+    const incompleteEventError = await getRepository(
+      IncompleteEventError
+    ).findOne({
+      where: {
+        collectionId: existingCollectionData.id,
+      },
+      order: {
+        createAt: "DESC",
+      },
+    });
+
+    if (incompleteEventError) {
+      const event = new Event({
+        collectionData: existingCollectionData,
+        openSeaAPI,
+        incompleteEventError,
+      });
+      await event.createEventList();
+    }
+
+    message.alreadyCollected(contractAddress);
+
+    return true;
+  }
+  return false;
+};
 
 const createCollectionData = async (req: Request, res: Response) => {
   try {
@@ -395,37 +434,11 @@ const createCollectionData = async (req: Request, res: Response) => {
       const openSeaAPI = new OpenSea(contractAddress);
 
       // 이미 수집된 컬랙션이 존재하면 카톡으로 알리고, 해당 컬랙션 수집 생략
-      const existingCollectionData = (await getRepository(Collection).findOne({
-        where: {
-          address: contractAddress,
-        },
-      })) as Collection;
-
-      if (existingCollectionData) {
-        // Data 수집 중 에러로 인하여 종료된 컬랙션인지 확인
-        const incompleteEventError = await getRepository(
-          IncompleteEventError
-        ).findOne({
-          where: {
-            collectionId: existingCollectionData.id,
-          },
-          order: {
-            createAt: "DESC",
-          },
-        });
-
-        if (incompleteEventError) {
-          const event = new Event({
-            collectionData: existingCollectionData,
-            openSeaAPI,
-            incompleteEventError,
-          });
-          await event.createEventList();
-        }
-
-        message.alreadyCollected(contractAddress);
-        continue;
-      }
+      const isAlreadyCollected = await alreadyCollected(
+        contractAddress,
+        openSeaAPI
+      );
+      if (isAlreadyCollected) continue;
 
       // Collection 데이터 생성
       const { isSuccess: isCollectionSuccess, collectionData } =
@@ -442,9 +455,16 @@ const createCollectionData = async (req: Request, res: Response) => {
       );
       if (!isNFTSuccess) return res.status(200).send({ success: false });
 
+      const collection = await getRepository(Collection).findOne({
+        where: {
+          address: "0x764aeebcf425d56800ef2c84f2578689415a2daa",
+        },
+      });
+      if (!collection) return;
+
       // Event 데이터 생성
       const event = new Event({
-        collectionData,
+        collectionData: collection,
         openSeaAPI,
       });
       await event.createEventList();
@@ -462,7 +482,6 @@ const createCollectionData = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true });
   } catch (e: any) {
-    console.log(e.message);
     sendMessage.sendKakaoMessage({
       object_type: "text",
       text: e.message,

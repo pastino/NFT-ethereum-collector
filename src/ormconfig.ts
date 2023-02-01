@@ -10,6 +10,7 @@ const ormconfig: ConnectionOptions = {
   database: process.env.DATABASE,
   synchronize: true,
   logging: ["warn", "error"],
+  charset: "utf8mb4_unicode_ci",
   entities: [__dirname + "/entities/*.*"],
   migrations: [__dirname + "/migrations/*.*"],
   subscribers: [__dirname + "/subscribers/*.*"],

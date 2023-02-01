@@ -15,8 +15,8 @@ export class CollectionEvent {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
-  eventId: number;
+  @Column({ type: "bigint", nullable: true })
+  eventId: string;
 
   @Column({ type: "int", nullable: true })
   @ManyToOne(() => NFT, (nft) => nft.id, {
@@ -43,17 +43,17 @@ export class CollectionEvent {
   @Column({ nullable: true })
   auctionType: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "bigint", nullable: true })
   totalPrice: string;
 
   @Column({ nullable: true })
   createdDate: string;
   // "2023-01-26T03:22:51.472367"
 
-  @Column({ nullable: true })
-  quantity: string;
+  @Column({ type: "int", nullable: true })
+  quantity: number;
 
-  @Column({ nullable: true })
+  @Column({ type: "bigint", nullable: true })
   bidAmount: string;
 
   @Column({ nullable: true })
@@ -74,10 +74,10 @@ export class CollectionEvent {
   @Column({ nullable: true })
   duration: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "bigint", nullable: true })
   endingPrice: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "bigint", nullable: true })
   startingPrice: string;
 
   @Column({ nullable: true })
