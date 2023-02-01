@@ -154,6 +154,7 @@ class Event {
         new Date(lastSavedEvent?.eventTimestamp),
         1
       );
+      console.log("occurredBefore", this.occurredBefore);
     }
   };
 
