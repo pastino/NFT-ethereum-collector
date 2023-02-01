@@ -148,9 +148,9 @@ class Event {
 
       if (!lastSavedEvent) return { isSuccess: false };
 
-      this.occurredBefore = subtractHours(
+      this.occurredBefore = addHours(
         new Date(lastSavedEvent?.eventTimestamp),
-        1
+        3
       );
     }
   };
@@ -277,7 +277,7 @@ class Event {
           assetEvents.length
         } Event 입니다`
       );
-
+      this.page += 1;
       const event = assetEvents[i];
 
       if (this.occurredBefore) {
@@ -287,7 +287,6 @@ class Event {
           },
         });
 
-        console.log("existingEvent", existingEvent);
         // 종료되었던 이벤트 데이터 저장 중 - 이미 저장된 이벤트는 생략
         if (existingEvent) {
           continue;
@@ -347,21 +346,21 @@ class Event {
         await this.insertEventList(assetEvents);
       }
     } catch (e: any) {
-      console.log("500 에러 발생");
-      if (typeof JSON.parse(JSON.stringify(e)) === "object") {
-        const response = JSON.parse(JSON.stringify(e));
-        console.log("response", response);
+      console.log("error 발생");
+      const response = JSON.parse(JSON.stringify(e));
+      if (typeof response === "object") {
         const code = response?.status;
+        console.log(code);
+        console.log(this.retryCount, this.MAX_RETRY_COUNT);
         if (
           typeof code === "number" &&
           code >= 500 &&
           this.retryCount < this.MAX_RETRY_COUNT
         ) {
-          console.log("ok");
           this.retryCount++;
           // 10분간 정지 - opensea api 오버 트래픽 방지
           await sleep(60 * 10);
-
+          console.log("send message");
           await sendMessage.sendKakaoMessage({
             object_type: "text",
             text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 이벤트 시점부터 다시 수집을 시작합니다. (${this.retryCount}/${this.MAX_RETRY_COUNT})`,
@@ -369,7 +368,7 @@ class Event {
           });
           await this.createEventList();
         } else {
-          console.log("why?");
+          console.log("그냥 에러");
           throw new Error(e.message);
         }
       }
