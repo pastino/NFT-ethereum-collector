@@ -3,7 +3,7 @@ import "reflect-metadata";
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import { createConnection, getRepository } from "typeorm";
+import { createConnection } from "typeorm";
 import connectionOptions from "./ormconfig";
 import createCollectionData from "./routes/createCollectionData";
 import kakaoAuthorization from "./routes/kakaoAuthorization";

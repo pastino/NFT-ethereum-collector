@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getRepository } from "typeorm";
-import { makeAxiosErrorText } from "../commons/error";
+import { makeAxiosErrorJson, makeAxiosErrorText } from "../commons/error";
 import { ERROR_STATUS_CODE } from "../commons/error";
 import { isAxiosError } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
@@ -117,11 +117,15 @@ export class OpenSea {
   }: {
     collectionData: Collection;
     cursor: string;
-    occurredBefore?: Date | null;
+    occurredBefore: Date;
   }) => {
     try {
       const response = await axios.get(
-        `https://api.opensea.io/api/v1/events?collection_slug=${collectionData.slug}&occurred_before=${occurredBefore}&cursor=${cursor}`,
+        `https://api.opensea.io/api/v1/events?collection_slug=${
+          collectionData.slug
+        }&occurred_before=${new Date(
+          occurredBefore
+        ).getTime()}&cursor=${cursor}`,
         this.headerConfig
       );
 
@@ -129,10 +133,11 @@ export class OpenSea {
         status: number;
         data: { asset_events: any[]; next: string };
       };
-    } catch (e) {
+    } catch (e: any) {
       await this.makeEventErrorRecord(collectionData.id);
+
       if (isAxiosError(e)) {
-        throw new Error(makeAxiosErrorText(e));
+        throw new Error(JSON.stringify(makeAxiosErrorJson(e)));
       }
       throw new Error(
         "getEventList 함수를 실행하는 중 런타임 에러가 발생하였습니다."
