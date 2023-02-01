@@ -148,7 +148,7 @@ class Event {
 
       if (!lastSavedEvent) return { isSuccess: false };
 
-      this.occurredBefore = subtractHours(
+      this.occurredBefore = addHours(
         new Date(lastSavedEvent?.eventTimestamp),
         1
       );
