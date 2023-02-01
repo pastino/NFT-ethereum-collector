@@ -43,7 +43,7 @@ export class CollectionEvent {
   @Column({ nullable: true })
   auctionType: string;
 
-  @Column({ type: "bigint", nullable: true })
+  @Column({ nullable: true })
   totalPrice: string;
 
   @Column({ nullable: true })
@@ -53,7 +53,7 @@ export class CollectionEvent {
   @Column({ type: "int", nullable: true })
   quantity: number;
 
-  @Column({ type: "bigint", nullable: true })
+  @Column({ nullable: true })
   bidAmount: string;
 
   @Column({ nullable: true })
@@ -74,10 +74,10 @@ export class CollectionEvent {
   @Column({ nullable: true })
   duration: string;
 
-  @Column({ type: "bigint", nullable: true })
+  @Column({ nullable: true })
   endingPrice: string;
 
-  @Column({ type: "bigint", nullable: true })
+  @Column({ nullable: true })
   startingPrice: string;
 
   @Column({ nullable: true })

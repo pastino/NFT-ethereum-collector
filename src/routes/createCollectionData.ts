@@ -118,7 +118,6 @@ class Event {
   private cursor: string = "";
   private page: number = 1;
   private occurredBefore: Date | null = null;
-  private isAlreadySavedEvent: boolean = false;
   private collectionData: Collection;
   private openSeaAPI: OpenSea;
   private incompleteEventError: IncompleteEventError | undefined;
@@ -143,18 +142,16 @@ class Event {
     if (this.incompleteEventError) {
       const lastSavedEvent = await getRepository(CollectionEvent).findOne({
         where: {
-          id: this.incompleteEventError.id,
+          id: this.incompleteEventError.collectionEventId,
         },
       });
 
       if (!lastSavedEvent) return { isSuccess: false };
 
-      this.isAlreadySavedEvent = true;
       this.occurredBefore = subtractHours(
         new Date(lastSavedEvent?.eventTimestamp),
         1
       );
-      console.log("occurredBefore", this.occurredBefore);
     }
   };
 
@@ -283,23 +280,17 @@ class Event {
 
       const event = assetEvents[i];
 
-      if (this.occurredBefore && this.isAlreadySavedEvent) {
+      if (this.occurredBefore) {
         const existingEvent = await getRepository(CollectionEvent).findOne({
           where: {
             eventId: event.id,
           },
         });
 
+        console.log("existingEvent", existingEvent);
         // 종료되었던 이벤트 데이터 저장 중 - 이미 저장된 이벤트는 생략
         if (existingEvent) {
-          this.isAlreadySavedEvent = true;
           continue;
-        } else {
-          /* 종료되었던 이벤트 데이터 저장 중 - 
-          저장되지 않았으면 isAlreadySavedEvent를 false로 변경하여 
-          이벤트가 존재하는지 추가로 확인하지 않는다.
-          */
-          this.isAlreadySavedEvent = false;
         }
       }
 
@@ -342,6 +333,7 @@ class Event {
     try {
       // 이전에 이벤트 데이터 쌓는 도중 오류로 인해 중단된 기록있는지 확인.
       // 있다면 occurredBefore 상태값 업데이트
+
       await this.checkDiscontinuedHistory();
       // 이벤트 데이터 쌓기 시작
       while (true) {
