@@ -354,14 +354,17 @@ class Event {
         this.insertEventList(assetEvents);
       }
     } catch (e: any) {
+      console.log("500 에러 발생");
       if (typeof JSON.parse(JSON.stringify(e)) === "object") {
         const response = JSON.parse(JSON.stringify(e));
+        console.log("response", response);
         const code = response?.status;
         if (
           typeof code === "number" &&
           code >= 500 &&
           this.retryCount < this.MAX_RETRY_COUNT
         ) {
+          console.log("ok");
           this.retryCount++;
           // 10분간 정지 - opensea api 오버 트래픽 방지
           await sleep(60 * 10);
@@ -373,6 +376,7 @@ class Event {
           });
           await this.createEventList();
         } else {
+          console.log("why?");
           throw new Error(e.message);
         }
       }
