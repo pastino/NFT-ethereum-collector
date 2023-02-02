@@ -277,7 +277,6 @@ class Event {
           assetEvents.length
         } Event 입니다`
       );
-
       const event = assetEvents[i];
 
       if (this.occurredBefore) {
@@ -352,7 +351,6 @@ class Event {
       if (typeof response === "object") {
         console.log("response", response);
         const code = response?.status;
-
         console.log(code);
         console.log(this.retryCount, this.MAX_RETRY_COUNT);
         if (
@@ -494,3 +492,4 @@ const createCollectionData = async (req: Request, res: Response) => {
 };
 
 export default createCollectionData;
+
