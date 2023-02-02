@@ -277,7 +277,7 @@ class Event {
           assetEvents.length
         } Event 입니다`
       );
-
+      this.page += 1;
       const event = assetEvents[i];
 
       if (this.occurredBefore) {
@@ -493,3 +493,4 @@ const createCollectionData = async (req: Request, res: Response) => {
 };
 
 export default createCollectionData;
+
