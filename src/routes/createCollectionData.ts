@@ -344,11 +344,13 @@ class Event {
         const assetEvents = await this.getEventList();
         // 이벤트 데이터 저장
         await this.insertEventList(assetEvents);
+        this.page += 1;
       }
     } catch (e: any) {
       console.log("error 발생");
       const response = JSON.parse(JSON.stringify(e));
       if (typeof response === "object") {
+        console.log("response", response);
         const code = response?.status;
         console.log(code);
         console.log(this.retryCount, this.MAX_RETRY_COUNT);
