@@ -220,4 +220,8 @@ export const ERROR_STATUS_CODE: {
     description:
       "상태 코드는 클라이언트가 네트워크 액세스를 얻기 위해 인증할 필요가 있음을 나타냅니다.",
   },
+  599: {
+    statusText: "ECONNRESET",
+    description: "서버 네트워크 에러",
+  },
 };
