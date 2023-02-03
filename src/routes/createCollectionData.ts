@@ -9,7 +9,7 @@ import { CreateEntityData } from "../modules/manufactureData";
 import { OpenSea } from "../modules/requestAPI";
 import moment from "moment";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
-import { addHours, isAxiosError, sleep, subtractHours } from "../commons/utils";
+import { addHours, isAxiosError, sleep } from "../commons/utils";
 import { makeAxiosErrorText } from "../commons/error";
 
 // TODO 절대경로 생성
@@ -468,7 +468,7 @@ const createCollectionData = async (req: Request, res: Response) => {
 
       await sendMessage.sendKakaoMessage({
         object_type: "text",
-        text: `${moment(new Date()).format(
+        text: `${moment(addHours(new Date(), 9)).format(
           "MM/DD HH:mm"
         )}\n\n<컬랙션 생성 완료 - ${i + 1}/${collectionList.length}>\n\n${
           collectionData.name
