@@ -29,6 +29,9 @@ export class IncompleteEventError {
   @JoinColumn({ name: "collectionEventId", referencedColumnName: "id" })
   collectionEventId: number;
 
+  @Column({ type: String })
+  errorType: "nft" | "event";
+
   @CreateDateColumn()
   createAt: Date;
   @UpdateDateColumn()
