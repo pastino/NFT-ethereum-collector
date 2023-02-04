@@ -156,6 +156,7 @@ export class OpenSea {
           );
         }
 
+        console.log("ee", JSON.stringify(makeAxiosErrorJson(e)));
         throw new Error(JSON.stringify(makeAxiosErrorJson(e)));
       }
       throw new Error(

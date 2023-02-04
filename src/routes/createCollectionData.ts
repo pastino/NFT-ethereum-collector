@@ -169,6 +169,8 @@ class Event {
       this.cursor = next;
       return asset_events;
     } catch (e: any) {
+      console.log("eee", JSON.parse(JSON.stringify(e)));
+      console.log("eeee", e);
       throw new Error(e);
     }
   };
