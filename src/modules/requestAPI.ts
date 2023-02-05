@@ -43,22 +43,9 @@ export class OpenSea {
         status: number;
         data: { collection: {}; address: string };
       };
-    } catch (e: unknown) {
-      if (isAxiosError(e)) {
-        throw new Error(
-          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
-            e.response?.data
-          }\n\n*statusText*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].statusText
-          }\n\n*statusDescription*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].description
-          }`
-        );
-      }
+    } catch (e: any) {
+      throw new Error(e);
     }
-    throw new Error(
-      "getCollection 함수를 실행하는 중 런타임 에러가 발생하였습니다."
-    );
   };
 
   public getCollectionBySlug = async (collectionSlug: string) => {
@@ -135,14 +122,9 @@ export class OpenSea {
         status: number;
         data: { assets: any[]; next: string };
       };
-    } catch (e: unknown) {
-      if (isAxiosError(e)) {
-        throw new Error(makeAxiosErrorText(e));
-      }
+    } catch (e: any) {
+      throw new Error(e);
     }
-    throw new Error(
-      "getNFTList 함수를 실행하는 중 런타임 에러가 발생하였습니다."
-    );
   };
 
   public getNFT = async (collectionData: any, tokenId: string) => {

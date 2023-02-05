@@ -4,7 +4,7 @@ import { IncompleteEventError } from "../entities/ IncompleteEventError";
 import { Collection } from "../entities/Collection";
 import { NFT as NFTEntity } from "../entities/NFT";
 import { User } from "../entities/User";
-import { Message, SendMessage } from "../modules/kakaoMessage";
+import { SendMessage } from "../modules/kakaoMessage";
 import { CreateEntityData } from "../modules/manufactureData";
 import { OpenSea } from "../modules/requestAPI";
 const sendMessage = new SendMessage();
@@ -12,23 +12,18 @@ const sendMessage = new SendMessage();
 export class NFT {
   private collectionData: Collection;
   private openSeaAPI: OpenSea;
-  private incompleteEventError: IncompleteEventError | undefined;
-
   private cursor: string = "";
   private page: number = 1;
 
   constructor({
     collectionData,
     openSeaAPI,
-    incompleteEventError,
   }: {
     collectionData: Collection;
     openSeaAPI: OpenSea;
-    incompleteEventError?: IncompleteEventError;
   }) {
     this.collectionData = collectionData;
     this.openSeaAPI = openSeaAPI;
-    this.incompleteEventError = incompleteEventError;
   }
 
   getIsExistingNFTError = async (
