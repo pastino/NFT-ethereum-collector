@@ -8,6 +8,7 @@ import { SendMessage } from "../modules/kakaoMessage";
 import { CreateEntityData } from "../modules/manufactureData";
 import { OpenSea } from "../modules/requestAPI";
 const sendMessage = new SendMessage();
+
 export class NFT {
   private collectionData: Collection;
   private openSeaAPI: OpenSea;
@@ -57,7 +58,7 @@ export class NFT {
     try {
       const { hasiIcompleteError, incompleteError } =
         await this.getIsExistingNFTError(this.collectionData.id);
-
+        
       while (true) {
         if (this.cursor === null) {
           if (hasiIcompleteError && incompleteError) {
