@@ -28,8 +28,6 @@ const createWalletAndCollection = async (req: Request, res: Response) => {
 
         if (collectionList.length === 0) return;
 
-        console.log("collectionList", collectionList);
-
         await createCollectionAndNFTAndEvent(collectionList);
 
         offset += 300;

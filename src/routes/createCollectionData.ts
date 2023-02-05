@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
-import { Collection } from "../entities/Collection";
+import { Collection as CollectionEntity } from "../entities/Collection";
 import { OpenSea } from "../modules/requestAPI";
 import moment from "moment";
 import { addHours } from "../commons/utils";
 import { Event } from "../service/event";
 import { SendMessage } from "../modules/kakaoMessage";
-import { createCollection } from "../service/collection";
+import { Collection } from "../service/collection";
 import { NFT } from "../service/nft";
 
 // TODO 절대경로 생성
@@ -21,13 +21,12 @@ export const createCollectionAndNFTAndEvent = async (
       const contractAddress: string = collectionList[i];
       const openSeaAPI = new OpenSea();
 
-      // Collection 데이터 생성
-      const { isSuccess: isCollectionSuccess, collectionData } =
-        await createCollection(contractAddress, openSeaAPI);
-      if (!isCollectionSuccess || !collectionData) {
-        // TODO 해당 컬랙션 생략한다는 메세지 보내기
-        continue;
-      }
+      const collectionClass = new Collection({ contractAddress, openSeaAPI });
+
+      const { isSuccess: isCollectionSuccess, collectionData }: any =
+        await collectionClass.createCollection();
+
+      if (!isCollectionSuccess && collectionData) continue;
 
       // NFT 데이터 생성
       const createNFT = new NFT({ collectionData, openSeaAPI });
@@ -38,13 +37,13 @@ export const createCollectionAndNFTAndEvent = async (
       let collection;
 
       if (isAddress) {
-        collection = await getRepository(Collection).findOne({
+        collection = await getRepository(CollectionEntity).findOne({
           where: {
             address: contractAddress,
           },
         });
       } else {
-        collection = await getRepository(Collection).findOne({
+        collection = await getRepository(CollectionEntity).findOne({
           where: {
             slug: contractAddress,
           },
