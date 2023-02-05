@@ -6,8 +6,8 @@ import moment from "moment";
 import { addHours } from "../commons/utils";
 import { Event } from "../service/event";
 import { SendMessage } from "../modules/kakaoMessage";
-import { alreadyCollected, createCollection } from "../service/collection";
-import { createNFT } from "../service/nft";
+import { createCollection } from "../service/collection";
+import { NFT } from "../service/nft";
 
 // TODO 절대경로 생성
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
@@ -16,45 +16,62 @@ const sendMessage = new SendMessage();
 export const createCollectionAndNFTAndEvent = async (
   collectionList: string[]
 ) => {
-  for (let i = 0; i < collectionList.length; i++) {
-    const contractAddress = collectionList[i];
+  try {
+    for (let i = 0; i < collectionList.length; i++) {
+      const contractAddress: string = collectionList[i];
+      const openSeaAPI = new OpenSea();
 
-    const openSeaAPI = new OpenSea();
+      // Collection 데이터 생성
+      const { isSuccess: isCollectionSuccess, collectionData } =
+        await createCollection(contractAddress, openSeaAPI);
+      if (!isCollectionSuccess || !collectionData) {
+        // TODO 해당 컬랙션 생략한다는 메세지 보내기
+        continue;
+      }
 
-    // Collection 데이터 생성
-    const { isSuccess: isCollectionSuccess, collectionData } =
-      await createCollection(contractAddress, openSeaAPI);
-    if (!isCollectionSuccess || !collectionData) {
-      // TODO 해당 컬랙션 생략한다는 메세지 보내기
-      continue;
+      // NFT 데이터 생성
+      const createNFT = new NFT({ collectionData, openSeaAPI });
+      await createNFT.createNFT();
+
+      const isAddress = contractAddress.substring(0, 1) === "0x";
+
+      let collection;
+
+      if (isAddress) {
+        collection = await getRepository(Collection).findOne({
+          where: {
+            address: contractAddress,
+          },
+        });
+      } else {
+        collection = await getRepository(Collection).findOne({
+          where: {
+            slug: contractAddress,
+          },
+        });
+      }
+
+      if (!collection) continue;
+
+      // Event 데이터 생성
+      const event = new Event({
+        collectionData: collection,
+        openSeaAPI,
+      });
+      await event.createEventList();
+
+      await sendMessage.sendKakaoMessage({
+        object_type: "text",
+        text: `${moment(addHours(new Date(), 9)).format(
+          "MM/DD HH:mm"
+        )}\n\n<컬랙션 생성 완료 - ${i + 1}/${collectionList.length}>\n\n${
+          collectionData.name
+        } 컬랙션 데이터 생성이 완료되었습니다`,
+        link: { mobile_web_url: "", web_url: "" },
+      });
     }
-
-    // NFT 데이터 생성
-    await createNFT(collectionData, openSeaAPI);
-
-    const collection = await getRepository(Collection).findOne({
-      where: {
-        address: contractAddress,
-      },
-    });
-    if (!collection) return;
-
-    // Event 데이터 생성
-    const event = new Event({
-      collectionData: collection,
-      openSeaAPI,
-    });
-    await event.createEventList();
-
-    await sendMessage.sendKakaoMessage({
-      object_type: "text",
-      text: `${moment(addHours(new Date(), 9)).format(
-        "MM/DD HH:mm"
-      )}\n\n<컬랙션 생성 완료 - ${i + 1}/${collectionList.length}>\n\n${
-        collectionData.name
-      } 컬랙션 데이터 생성이 완료되었습니다`,
-      link: { mobile_web_url: "", web_url: "" },
-    });
+  } catch (e: any) {
+    throw new Error(e.message);
   }
 };
 

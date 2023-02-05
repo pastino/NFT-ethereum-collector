@@ -15,7 +15,7 @@ export const createCollection = async (
     const { isHas, existingCollectionData } = await alreadyCollected(
       contractAddress
     );
-    if (!isHas && existingCollectionData)
+    if (isHas && existingCollectionData)
       return { isSuccess: false, collectionData: existingCollectionData };
 
     const {
@@ -26,7 +26,7 @@ export const createCollection = async (
     const createEntityData = new CreateEntityData({
       snakeObject: {
         ...collection,
-        address: address,
+        address,
       },
       entity: Collection,
       filterList: ["id"],
@@ -46,11 +46,23 @@ export const createCollection = async (
 export const alreadyCollected = async (
   contractAddress: string
 ): Promise<{ isHas: boolean; existingCollectionData: Collection | null }> => {
-  const existingCollectionData = (await getRepository(Collection).findOne({
-    where: {
-      address: contractAddress,
-    },
-  })) as Collection;
+  const isAddress = contractAddress.substring(0, 1) === "0x";
+
+  let existingCollectionData;
+  if (isAddress) {
+    existingCollectionData = (await getRepository(Collection).findOne({
+      where: {
+        address: contractAddress,
+      },
+    })) as Collection;
+  } else {
+    existingCollectionData = (await getRepository(Collection).findOne({
+      where: {
+        slug: contractAddress,
+      },
+    })) as Collection;
+  }
+
   if (existingCollectionData) {
     return { isHas: true, existingCollectionData };
   }
