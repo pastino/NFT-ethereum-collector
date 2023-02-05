@@ -7,7 +7,7 @@ import { addHours } from "../commons/utils";
 import { Event } from "../service/event";
 import { SendMessage } from "../modules/kakaoMessage";
 import { createCollection } from "../service/collection";
-import { createNFT } from "../service/nft";
+import { NFT } from "../service/nft";
 
 // TODO 절대경로 생성
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
@@ -30,7 +30,8 @@ export const createCollectionAndNFTAndEvent = async (
       }
 
       // NFT 데이터 생성
-      await createNFT(collectionData, openSeaAPI);
+      const createNFT = new NFT({ collectionData, openSeaAPI });
+      await createNFT.createNFT();
 
       const isAddress = contractAddress.substring(0, 1) === "0x";
 

@@ -248,7 +248,8 @@ export class Event {
       const response = JSON.parse(JSON.stringify(e));
       if (typeof response === "object") {
         const code = response?.status;
-
+        console.log("response", response);
+        console.log("code", code);
         if (
           typeof code === "number" &&
           code >= 500 &&
