@@ -206,31 +206,32 @@ export class OpenSea {
         data: { asset_events: any[]; next: string };
       };
     } catch (e: any) {
-      await this.makeEventErrorRecord(collectionData.id);
-      if (isAxiosError(e)) {
-        if (e.code === "ECONNRESET") {
-          /* 
-          현재 서버를 집에 서버 컴퓨터를 두고 인터넷 연결하여 사용중
-          따라서 인터넷 연결이 불안정하여 끊길 경우가 있음. 해당 경우 에러처리
-          */
-          throw new Error(
-            JSON.stringify(
-              makeAxiosErrorJson({
-                response: {
-                  status: 599,
-                  data: "서버 네트워크 에러가 발생하였습니다.",
-                  statusText: "ECONNRESET",
-                },
-              } as never)
-            )
-          );
-        }
+      throw new Error(e);
+      // await this.makeEventErrorRecord(collectionData.id);
+      // if (isAxiosError(e)) {
+      //   if (e.code === "ECONNRESET") {
+      //     /*
+      //     현재 서버를 집에 서버 컴퓨터를 두고 인터넷 연결하여 사용중
+      //     따라서 인터넷 연결이 불안정하여 끊길 경우가 있음. 해당 경우 에러처리
+      //     */
+      //     throw new Error(
+      //       JSON.stringify(
+      //         makeAxiosErrorJson({
+      //           response: {
+      //             status: 599,
+      //             data: "서버 네트워크 에러가 발생하였습니다.",
+      //             statusText: "ECONNRESET",
+      //           },
+      //         } as never)
+      //       )
+      //     );
+      //   }
 
-        throw new Error(JSON.stringify(makeAxiosErrorJson(e)));
-      }
-      throw new Error(
-        "getEventList 함수를 실행하는 중 런타임 에러가 발생하였습니다."
-      );
+      //   throw new Error(JSON.stringify(makeAxiosErrorJson(e)));
+      // }
+      // throw new Error(
+      //   "getEventList 함수를 실행하는 중 런타임 에러가 발생하였습니다."
+      // );
     }
   };
 }

@@ -245,30 +245,43 @@ export class Event {
         this.page += 1;
       }
     } catch (e: any) {
-      const response = JSON.parse(JSON.stringify(e));
-      if (typeof response === "object") {
-        const code = response?.status;
-        console.log("response", response);
-        console.log("code", code);
-        if (
-          typeof code === "number" &&
-          code >= 500 &&
-          this.retryCount < this.MAX_RETRY_COUNT
-        ) {
-          this.retryCount++;
-          // 10분간 정지 - opensea api 오버 트래픽 방지
-          await sleep(60 * 10);
-          await sendMessage.sendKakaoMessage({
-            object_type: "text",
-            text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 이벤트 시점부터 다시 수집을 시작합니다. (${this.retryCount}/${this.MAX_RETRY_COUNT})`,
-            link: { mobile_web_url: "", web_url: "" },
-          });
-          await this.createEventList();
-        } else {
-          throw new Error(e.message);
-        }
-      }
-      throw new Error(e);
+      await sendMessage.sendKakaoMessage({
+        object_type: "text",
+        text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 이벤트 시점부터 다시 수집을 시작합니다.`,
+        link: { mobile_web_url: "", web_url: "" },
+      });
+      await sleep(60 * 10);
+      await sendMessage.sendKakaoMessage({
+        object_type: "text",
+        text: `Event 재수집 시작`,
+        link: { mobile_web_url: "", web_url: "" },
+      });
+      await this.createEventList();
+
+      // const response = JSON.parse(JSON.stringify(e));
+      // if (typeof response === "object") {
+      //   const code = response?.status;
+      //   console.log("response", response);
+      //   console.log("code", code);
+      //   if (
+      //     typeof code === "number" &&
+      //     code >= 500 &&
+      //     this.retryCount < this.MAX_RETRY_COUNT
+      //   ) {
+      //     this.retryCount++;
+      //     // 10분간 정지 - opensea api 오버 트래픽 방지
+      //     await sleep(60 * 10);
+      //     await sendMessage.sendKakaoMessage({
+      //       object_type: "text",
+      //       text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 이벤트 시점부터 다시 수집을 시작합니다. (${this.retryCount}/${this.MAX_RETRY_COUNT})`,
+      //       link: { mobile_web_url: "", web_url: "" },
+      //     });
+      //     await this.createEventList();
+      //   } else {
+      //     throw new Error(e.message);
+      //   }
+      // }
+      // throw new Error(e);
     }
   };
 }
