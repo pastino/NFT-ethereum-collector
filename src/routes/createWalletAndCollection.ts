@@ -14,23 +14,26 @@ const createWalletAndCollection = async (req: Request, res: Response) => {
     const openSea = new OpenSea();
 
     for (let i = 0; i < walletList.length; i++) {
-      // 컬렉션 리스트 가져오기
       const walletAddress = walletList[i];
 
       let offset = 0;
+      while (true) {
+        // 컬렉션 리스트 가져오기
+        const { data } = await openSea.getCollectionList({
+          assetOwner: walletAddress,
+          offset,
+        });
 
-      const { data } = await openSea.getCollectionList({
-        assetOwner: walletAddress,
-        offset,
-      });
+        const collectionList = data.map((item: any) => item.slug);
 
-      const collectionList = data.map(
-        (item: any) => item.primary_asset_contracts?.[0]?.address
-      );
+        if (collectionList.length === 0) return;
 
-      await createCollectionAndNFTAndEvent(collectionList);
+        console.log("collectionList", collectionList);
 
-      offset = +1;
+        await createCollectionAndNFTAndEvent(collectionList);
+
+        offset += 300;
+      }
     }
 
     return res.status(200).json({ success: true });

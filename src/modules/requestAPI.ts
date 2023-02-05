@@ -2,7 +2,7 @@ import axios from "axios";
 import { getRepository } from "typeorm";
 import { makeAxiosErrorJson, makeAxiosErrorText } from "../commons/error";
 import { ERROR_STATUS_CODE } from "../commons/error";
-import { isAxiosError } from "../commons/utils";
+import { isAxiosError, sleep } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
 import { Collection } from "../entities/Collection";
 import { CollectionEvent } from "../entities/CollectionEvent";
@@ -19,8 +19,52 @@ export class OpenSea {
 
   public getCollection = async (contractAddress: string) => {
     try {
+      const isAddress = contractAddress.substring(0, 1) === "0x";
+
+      let response;
+
+      if (isAddress) {
+        response = await axios.get(
+          `https://api.opensea.io/api/v1/asset_contract/${contractAddress}`,
+          this.headerConfig
+        );
+      } else {
+        response = await axios.get(
+          `https://api.opensea.io/api/v1/collection/${contractAddress}`,
+          this.headerConfig
+        );
+        await sleep(1);
+        const nftList = await this.getNFTList(response.data?.collection, "");
+        response.data.address =
+          nftList.data.assets?.[0]?.asset_contract?.address;
+      }
+
+      return response as {
+        status: number;
+        data: { collection: {}; address: string };
+      };
+    } catch (e: unknown) {
+      if (isAxiosError(e)) {
+        throw new Error(
+          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
+            e.response?.data
+          }\n\n*statusText*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].statusText
+          }\n\n*statusDescription*\n${
+            ERROR_STATUS_CODE[e.response?.status as number].description
+          }`
+        );
+      }
+    }
+    throw new Error(
+      "getCollection 함수를 실행하는 중 런타임 에러가 발생하였습니다."
+    );
+  };
+
+  public getCollectionBySlug = async (collectionSlug: string) => {
+    try {
       const response = await axios.get(
-        `https://api.opensea.io/api/v1/asset_contract/${contractAddress}`,
+        `https://api.opensea.io/api/v1/collection/${collectionSlug}`,
         this.headerConfig
       );
 
@@ -69,9 +113,9 @@ export class OpenSea {
           `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
             e.response?.data
           }\n\n*statusText*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].statusText
+            ERROR_STATUS_CODE[e.response?.status as number]?.statusText
           }\n\n*statusDescription*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].description
+            ERROR_STATUS_CODE[e.response?.status as number]?.description
           }`
         );
       }
@@ -163,8 +207,6 @@ export class OpenSea {
       };
     } catch (e: any) {
       await this.makeEventErrorRecord(collectionData.id);
-      console.log(e);
-      console.log(e.message);
       if (isAxiosError(e)) {
         if (e.code === "ECONNRESET") {
           /* 
@@ -184,7 +226,6 @@ export class OpenSea {
           );
         }
 
-        console.log("ee", JSON.stringify(makeAxiosErrorJson(e)));
         throw new Error(JSON.stringify(makeAxiosErrorJson(e)));
       }
       throw new Error(
