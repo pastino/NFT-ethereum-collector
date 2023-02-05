@@ -67,8 +67,6 @@ export class Event {
       this.cursor = next;
       return asset_events;
     } catch (e: any) {
-      console.log("eee", JSON.parse(JSON.stringify(e)));
-      console.log("eeee", e);
       throw new Error(e);
     }
   };
@@ -247,14 +245,11 @@ export class Event {
         this.page += 1;
       }
     } catch (e: any) {
-      console.log("error 발생");
       const response = JSON.parse(JSON.stringify(e));
       if (typeof response === "object") {
-        console.log("response", response);
         const code = response?.status;
-
-        console.log(code);
-        console.log(this.retryCount, this.MAX_RETRY_COUNT);
+        console.log("response", response);
+        console.log("code", code);
         if (
           typeof code === "number" &&
           code >= 500 &&
@@ -263,7 +258,6 @@ export class Event {
           this.retryCount++;
           // 10분간 정지 - opensea api 오버 트래픽 방지
           await sleep(60 * 10);
-          console.log("send message");
           await sendMessage.sendKakaoMessage({
             object_type: "text",
             text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 이벤트 시점부터 다시 수집을 시작합니다. (${this.retryCount}/${this.MAX_RETRY_COUNT})`,
@@ -271,7 +265,6 @@ export class Event {
           });
           await this.createEventList();
         } else {
-          console.log("그냥 에러");
           throw new Error(e.message);
         }
       }
