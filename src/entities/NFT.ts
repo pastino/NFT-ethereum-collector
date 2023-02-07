@@ -72,7 +72,7 @@ export class NFT {
   permalink: string;
   // "https://opensea.io/assets/ethereum/0xccdf1373040d9ca4b5be1392d1945c1dae4a862c/2361"
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 1000 })
   tokenMetadata: string;
   // "https://chain.nft.porsche.com/0xCcDF1373040D9Ca4B5BE1392d1945C1DaE4a862c/2361"
 

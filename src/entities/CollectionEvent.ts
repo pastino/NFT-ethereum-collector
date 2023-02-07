@@ -66,9 +66,6 @@ export class CollectionEvent {
   customEventName: string;
 
   @Column({ nullable: true })
-  devFeePaymentEvent: string;
-
-  @Column({ nullable: true })
   devSellerFeeBasisPoints: number;
 
   @Column({ nullable: true })

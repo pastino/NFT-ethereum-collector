@@ -1,4 +1,5 @@
 import { getRepository } from "typeorm";
+import { RETURN_CODE_ENUM, RETURN_CODE_ENUM_TYPE } from "../commons/return";
 import { sleep } from "../commons/utils";
 import { Collection as CollectionEntity } from "../entities/Collection";
 import { SendMessage } from "../modules/kakaoMessage";
@@ -21,12 +22,22 @@ export class Collection {
     this.openSeaAPI = openSeaAPI;
   }
 
-  createCollection = async () => {
+  createCollection = async (): Promise<{
+    isSuccess: boolean;
+    collectionData: CollectionEntity | null;
+    code: RETURN_CODE_ENUM_TYPE;
+    message: string;
+  }> => {
     try {
       // 이미 수집된 컬랙션이 존재하면 카톡으로 알리고, 해당 컬랙션 수집 생략
-      const { isHas, existingCollectionData } = await this.alreadyCollected();
-      if (isHas && existingCollectionData)
-        return { isSuccess: false, collectionData: existingCollectionData };
+      const hasCollection = await this.alreadyCollected();
+      if (hasCollection)
+        return {
+          isSuccess: false,
+          code: RETURN_CODE_ENUM["이미 생성된 컬랙션"],
+          message: "이미 생성된 컬랙션입니다.",
+          collectionData: null,
+        };
 
       const {
         data: { collection, address },
@@ -47,7 +58,12 @@ export class Collection {
         createEntityData.createTableRowData()
       );
 
-      return { isSuccess: true, collectionData };
+      return {
+        isSuccess: true,
+        collectionData,
+        code: "0",
+        message: "",
+      };
     } catch (e: any) {
       await sendMessage.sendKakaoMessage({
         object_type: "text",
@@ -56,34 +72,38 @@ export class Collection {
       });
       await sleep(60 * 10);
       await this.createCollection();
+
+      // 실행안되는 Return
+      return {
+        isSuccess: false,
+        collectionData: null,
+        code: "0",
+        message: "",
+      };
     }
   };
 
-  alreadyCollected = async (): Promise<{
-    isHas: boolean;
-    existingCollectionData: CollectionEntity | null;
-  }> => {
+  alreadyCollected = async (): Promise<boolean> => {
     const isAddress = this.contractAddress.substring(0, 1) === "0x";
 
-    let existingCollectionData;
-    if (isAddress) {
-      existingCollectionData = (await getRepository(CollectionEntity).findOne({
-        where: {
+    const where = isAddress
+      ? {
           address: this.contractAddress,
-        },
-      })) as CollectionEntity;
-    } else {
-      existingCollectionData = (await getRepository(CollectionEntity).findOne({
-        where: {
+        }
+      : {
           slug: this.contractAddress,
-        },
-      })) as CollectionEntity;
-    }
+        };
+
+    const existingCollectionData = (await getRepository(
+      CollectionEntity
+    ).findOne({
+      where,
+    })) as CollectionEntity;
 
     if (existingCollectionData) {
-      return { isHas: true, existingCollectionData };
+      return true;
     }
 
-    return { isHas: false, existingCollectionData: null };
+    return false;
   };
 }
