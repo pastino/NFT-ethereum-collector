@@ -60,14 +60,6 @@ export class NFT {
 
       while (true) {
         if (this.cursor === null) {
-          if (hasiIcompleteError && incompleteError) {
-            await getRepository(IncompleteEventError).findOne({
-              where: {
-                collectionId: incompleteError.collectionId,
-                errorType: "nft",
-              },
-            });
-          }
           return { isSuccess: true };
         }
 
