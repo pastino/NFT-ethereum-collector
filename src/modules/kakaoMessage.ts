@@ -115,6 +115,7 @@ export class SendMessage {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+
       const resultCode = response?.data?.result_code;
 
       if (resultCode === 0) {

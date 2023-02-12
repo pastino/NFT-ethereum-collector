@@ -20,9 +20,6 @@ export class Wallet {
   @Column({ nullable: true })
   address: string;
 
-  @Column({ nullable: true })
-  config: string;
-
   @CreateDateColumn()
   createAt: Date;
   @UpdateDateColumn()
