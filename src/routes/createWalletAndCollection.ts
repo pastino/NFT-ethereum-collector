@@ -1,9 +1,30 @@
 import { Request, Response } from "express";
+import { getRepository } from "typeorm";
 import { SendMessage } from "../modules/kakaoMessage";
 import { OpenSea } from "../modules/requestAPI";
 import { createCollectionAndNFTAndEvent } from "./createCollectionData";
-
+import { Wallet } from "../entities/Wallet";
+import axios from "axios";
 const sendMessage = new SendMessage();
+
+const createWalletData = async (walletAddress: string) => {
+  try {
+    const res: any = await axios.get(
+      `https://api.opensea.io/user/${walletAddress}`
+    );
+
+    const username = res?.data?.username || "Unnamed";
+    const profileImage = res?.data?.account?.profile_img_url || "";
+
+    await getRepository(Wallet).save({
+      address: walletAddress,
+      username,
+      profileImgUrl: profileImage,
+    });
+  } catch (e) {
+    null;
+  }
+};
 
 const createWalletAndCollection = async (req: Request, res: Response) => {
   try {
@@ -17,6 +38,9 @@ const createWalletAndCollection = async (req: Request, res: Response) => {
       const walletAddress = walletList[i];
 
       let offset = 0;
+
+      await createWalletData(walletAddress);
+
       while (true) {
         // 컬렉션 리스트 가져오기
         const { data } = await openSea.getCollectionList({

@@ -1,6 +1,4 @@
 import { Request, Response } from "express";
-import { getRepository } from "typeorm";
-import { Collection as CollectionEntity } from "../entities/Collection";
 import { OpenSea } from "../modules/requestAPI";
 import moment from "moment";
 import { addHours } from "../commons/utils";
@@ -19,10 +17,10 @@ export const createCollectionAndNFTAndEvent = async (
 ) => {
   try {
     for (let i = 0; i < collectionList.length; i++) {
-      const contractAddress: string = collectionList[i];
+      const targetData: string = collectionList[i];
       const openSeaAPI = new OpenSea();
 
-      const collectionClass = new Collection({ contractAddress, openSeaAPI });
+      const collectionClass = new Collection({ targetData, openSeaAPI });
 
       const { collectionData, code } = await collectionClass.createCollection();
 
@@ -59,14 +57,11 @@ export const createCollectionAndNFTAndEvent = async (
 
 const createCollectionData = async (req: Request, res: Response) => {
   try {
-    // TODO 생성 중간 단계에 계속 카톡을 준다.
-    // TODO 생성이 완료되면 카톡을 준다.
     const {
       body: { collectionList },
     }: { body: { collectionList: string[] } } = req;
 
     await createCollectionAndNFTAndEvent(collectionList);
-
     return res.status(200).json({ success: true });
   } catch (e: any) {
     sendMessage.sendKakaoMessage({

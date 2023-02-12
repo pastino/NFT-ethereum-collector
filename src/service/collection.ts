@@ -8,17 +8,17 @@ import { OpenSea } from "../modules/requestAPI";
 
 const sendMessage = new SendMessage();
 export class Collection {
-  private contractAddress: string;
+  private targetData: string;
   private openSeaAPI: OpenSea;
 
   constructor({
-    contractAddress,
+    targetData,
     openSeaAPI,
   }: {
-    contractAddress: string;
+    targetData: string;
     openSeaAPI: OpenSea;
   }) {
-    this.contractAddress = contractAddress;
+    this.targetData = targetData;
     this.openSeaAPI = openSeaAPI;
   }
 
@@ -41,7 +41,7 @@ export class Collection {
 
       const {
         data: { collection, address },
-      } = await this.openSeaAPI.getCollection(this.contractAddress);
+      } = await this.openSeaAPI.getCollection(this.targetData);
 
       // 컬랙션 데이터 객체 생성
       const createEntityData = new CreateEntityData({
@@ -84,14 +84,14 @@ export class Collection {
   };
 
   alreadyCollected = async (): Promise<boolean> => {
-    const isAddress = this.contractAddress.substring(0, 1) === "0x";
+    const isAddress = this.targetData.substring(0, 1) === "0x";
 
     const where = isAddress
       ? {
-          address: this.contractAddress,
+          address: this.targetData,
         }
       : {
-          slug: this.contractAddress,
+          slug: this.targetData,
         };
 
     const existingCollectionData = (await getRepository(

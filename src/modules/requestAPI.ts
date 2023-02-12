@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getRepository } from "typeorm";
-import { makeAxiosErrorJson, makeAxiosErrorText } from "../commons/error";
+import { makeAxiosErrorText } from "../commons/error";
 import { ERROR_STATUS_CODE } from "../commons/error";
 import { isAxiosError, sleep } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
@@ -177,7 +177,7 @@ export class OpenSea {
       const response = await axios.get(
         `https://api.opensea.io/api/v1/events?collection_slug=${
           collectionData.slug
-        }&occurred_before=${new Date(
+        }&event_type=successful&occurred_before=${new Date(
           occurredBefore
         ).getTime()}&cursor=${cursor}`,
         this.headerConfig

@@ -55,9 +55,6 @@ export class NFT {
 
   createNFT = async () => {
     try {
-      const { hasiIcompleteError, incompleteError } =
-        await this.getIsExistingNFTError(this.collectionData.id);
-
       while (true) {
         if (this.cursor === null) {
           return { isSuccess: true };
@@ -76,16 +73,6 @@ export class NFT {
           );
 
           const asset = assets[i];
-
-          if (hasiIcompleteError) {
-            const existingNFTdata = await getRepository(NFTEntity).findOne({
-              where: {
-                tokenId: asset.token_id,
-                collectionId: this.collectionData.id,
-              },
-            });
-            if (existingNFTdata) continue;
-          }
 
           // 첫 번째 데이터에서 컬랙션 Creator 정보를 생성한다.
           if (this.page === 1 && i === 0) {
