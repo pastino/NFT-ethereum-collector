@@ -77,3 +77,4 @@ const createCollectionData = async (req: Request, res: Response) => {
 };
 
 export default createCollectionData;
+
