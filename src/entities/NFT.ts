@@ -46,7 +46,7 @@ export class NFT {
   imageThumbnailUrl: string;
   // "https://i.seadn.io/gcs/files/18fbc0955c653778af479d84edfe94c0.png?w=500&auto=format"
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 1000 })
   imageOriginalUrl: string;
   // "ipfs://QmWc74BGzge9ARuUTt4jRTdVbtKQqACDpdHNcWXHwRpVbB"
 

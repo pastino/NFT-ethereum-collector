@@ -5,6 +5,7 @@ import { OpenSea } from "../modules/requestAPI";
 import { createCollectionAndNFTAndEvent } from "./createCollectionData";
 import { Wallet } from "../entities/Wallet";
 import axios from "axios";
+
 const sendMessage = new SendMessage();
 
 const createWalletData = async (walletAddress: string) => {
