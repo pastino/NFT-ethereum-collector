@@ -74,26 +74,6 @@ export class NFT {
 
           const asset = assets[i];
 
-          // 첫 번째 데이터에서 컬랙션 Creator 정보를 생성한다.
-          if (this.page === 1 && i === 0) {
-            const { user, profile_img_url, address, config } = asset?.creator;
-
-            const existingUser = await getRepository(User).findOne({
-              where: {
-                address,
-              },
-            });
-
-            if (!existingUser) {
-              await getRepository(User).save({
-                username: user?.username || "",
-                profileImgUrl: profile_img_url || "",
-                address,
-                config,
-              });
-            }
-          }
-
           // NFT 데이터 객체 생성
           const createEntityData = new CreateEntityData({
             snakeObject: asset,
