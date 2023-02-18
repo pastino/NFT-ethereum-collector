@@ -11,7 +11,7 @@ import deleteCollectionData from "./routes/deleteCollectionData";
 import createWalletAndCollection from "./routes/createWalletAndCollection";
 
 const app = express();
-const PORT = 5002;
+const PORT = process.env.PORT;
 
 app.use(morgan("dev"));
 app.use(express.json());

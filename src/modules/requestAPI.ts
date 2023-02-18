@@ -10,6 +10,11 @@ import { CollectionEvent } from "../entities/CollectionEvent";
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
 export class OpenSea {
   private headerConfig = {
+    proxy: {
+      protocol: process.env.PROXY_PROTOCOL as string,
+      host: process.env.PROXY_HOST as string,
+      port: Number(process.env.PROXY_PORT) as number,
+    },
     headers: {
       "X-API-KEY": process.env.OPENSEA_API_KEY as string,
     },
@@ -26,6 +31,7 @@ export class OpenSea {
       if (isAddress) {
         response = await axios.get(
           `https://api.opensea.io/api/v1/asset_contract/${contractAddress}`,
+
           this.headerConfig
         );
       } else {
