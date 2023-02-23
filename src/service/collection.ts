@@ -42,11 +42,9 @@ export class Collection {
           message: "이미 생성된 컬랙션입니다.",
           collectionData: null,
         };
-
       const {
         data: { collection, address },
       } = await this.openSeaAPI.getCollection(this.targetData);
-
       // 컬랙션 데이터 객체 생성
       const createEntityData = new CreateEntityData({
         snakeObject: {
@@ -56,11 +54,15 @@ export class Collection {
         entity: CollectionEntity,
         filterList: ["id"],
       });
-
       // 컬랙션 데이터 Insert
       const collectionData = await getRepository(CollectionEntity).save(
         createEntityData.createTableRowData()
       );
+
+      await getRepository(WalletHasCollection).save({
+        walletId: walletData.id,
+        collectionId: collectionData.id,
+      });
 
       return {
         isSuccess: true,
@@ -97,32 +99,30 @@ export class Collection {
       : {
           slug: this.targetData,
         };
-
     const existingCollectionData = (await getRepository(
       CollectionEntity
     ).findOne({
       where,
     })) as CollectionEntity;
 
-    const existingWalletHasCollection = await getRepository(
-      WalletHasCollection
-    ).findOne({
-      where: {
-        walletId: walletData.id,
-        collectionId: existingCollectionData.id,
-      },
-    });
-
-    if (!existingWalletHasCollection) {
-      await getRepository(WalletHasCollection).save({
-        walletId: walletData.id,
-        collectionId: existingCollectionData.id,
-      });
-    }
-
+    console.log(1);
     if (existingCollectionData) {
       // 이미 수집된 컬랙션이면 Wallet 연결만 하고 return
+      const existingWalletHasCollection = await getRepository(
+        WalletHasCollection
+      ).findOne({
+        where: {
+          walletId: walletData.id,
+          collectionId: existingCollectionData.id,
+        },
+      });
 
+      if (!existingWalletHasCollection) {
+        await getRepository(WalletHasCollection).save({
+          walletId: walletData.id,
+          collectionId: existingCollectionData.id,
+        });
+      }
       return true;
     }
 

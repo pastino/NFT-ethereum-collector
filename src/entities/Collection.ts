@@ -5,12 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  ManyToMany,
-  JoinTable,
 } from "typeorm";
 import { CollectionEvent } from "./CollectionEvent";
 import { NFT } from "./NFT";
-import { Wallet } from "./Wallet";
+import { WalletHasCollection } from "./WalletHasCollection";
 
 @Entity()
 export class Collection {
@@ -102,6 +100,15 @@ export class Collection {
     onDelete: "CASCADE",
   })
   collectionEvent: CollectionEvent[];
+
+  @OneToMany(
+    () => WalletHasCollection,
+    (walletHasCollection) => walletHasCollection.collectionId,
+    {
+      onDelete: "CASCADE",
+    }
+  )
+  walletHasCollection: WalletHasCollection[];
 
   @CreateDateColumn()
   createAt: Date;
