@@ -1,18 +1,18 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { SendMessage } from "../modules/kakaoMessage";
-import { OpenSea } from "../modules/requestAPI";
+import { headerConfig, OpenSea } from "../modules/requestAPI";
 import { createCollectionAndNFTAndEvent } from "./createCollectionData";
 import { Wallet } from "../entities/Wallet";
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 const sendMessage = new SendMessage();
+const openSea = new OpenSea();
 
 const createWalletData = async (walletAddress: string) => {
   try {
-    const res: any = await axios.get(
-      `https://api.opensea.io/user/${walletAddress}`
-    );
+    const res: any = await openSea.getUser(walletAddress);
 
     const username = res?.data?.username || "Unnamed";
     const profileImage = res?.data?.account?.profile_img_url || "";
@@ -23,7 +23,7 @@ const createWalletData = async (walletAddress: string) => {
       profileImgUrl: profileImage,
     });
   } catch (e) {
-    null;
+    console.log(e);
   }
 };
 
@@ -33,13 +33,10 @@ const createWalletAndCollection = async (req: Request, res: Response) => {
       body: { walletList },
     }: { body: { walletList: string[] } } = req;
 
-    const openSea = new OpenSea();
-
     for (let i = 0; i < walletList.length; i++) {
       const walletAddress = walletList[i];
 
       let offset = 0;
-
       await createWalletData(walletAddress);
 
       while (true) {
@@ -48,7 +45,6 @@ const createWalletAndCollection = async (req: Request, res: Response) => {
           assetOwner: walletAddress,
           offset,
         });
-
         const collectionList = data.map((item: any) => item.slug);
 
         if (collectionList.length === 0) return;

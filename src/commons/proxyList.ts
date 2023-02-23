@@ -1,4 +1,4 @@
-const PROXY_LIST = [
+export const PROXY_LIST = [
   {
     protocol: "http",
     host: "162.223.94.163",
@@ -41,24 +41,27 @@ const PROXY_LIST = [
     port: "8888",
   },
 
+  // 사용
   {
     protocol: "http",
     host: "95.87.30.11",
     port: "8080",
   },
 
+  // 사용
   {
     protocol: "http",
     host: "134.209.29.120",
     port: "8080",
   },
-
+  // 사용
   {
     protocol: "http",
     host: "183.247.221.119",
     port: "30001",
   },
 
+  // 사용
   {
     protocol: "http",
     host: "110.164.15.182",
