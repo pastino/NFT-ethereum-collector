@@ -7,31 +7,33 @@ import { SendMessage } from "../modules/kakaoMessage";
 import { Collection } from "../service/collection";
 import { NFT } from "../service/nft";
 import { RETURN_CODE_ENUM } from "../commons/return";
+import { Wallet } from "../entities/Wallet";
 
 // TODO 절대경로 생성
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
 const sendMessage = new SendMessage();
 
-export const createCollectionAndNFTAndEvent = async (
-  collectionList: string[]
-) => {
+export const createCollectionAndNFTAndEvent = async ({
+  collectionList,
+  walletData,
+}: {
+  collectionList: string[];
+  walletData: Wallet;
+}) => {
   try {
     for (let i = 0; i < collectionList.length; i++) {
       const targetData: string = collectionList[i];
       const openSeaAPI = new OpenSea();
-
       const collectionClass = new Collection({ targetData, openSeaAPI });
-
-      const { collectionData, code } = await collectionClass.createCollection();
-
+      const { collectionData, code } = await collectionClass.createCollection(
+        walletData
+      );
       // 이미 생성된 컬랙션이라면 다음 컬랙션 생성으로 넘어감
       if (!collectionData || code === RETURN_CODE_ENUM["이미 생성된 컬랙션"])
         continue;
-
       // NFT 데이터 생성
       const createNFT = new NFT({ collectionData, openSeaAPI });
       await createNFT.createNFT();
-
       // Event 데이터 생성
       const event = new Event({
         collectionData: collectionData,
@@ -55,26 +57,26 @@ export const createCollectionAndNFTAndEvent = async (
   }
 };
 
-const createCollectionData = async (req: Request, res: Response) => {
-  try {
-    const {
-      body: { collectionList },
-    }: { body: { collectionList: string[] } } = req;
+// const createCollectionData = async (req: Request, res: Response) => {
+//   try {
+//     const {
+//       body: { collectionList },
+//     }: { body: { collectionList: string[] } } = req;
 
-    await createCollectionAndNFTAndEvent(collectionList);
-    return res.status(200).json({ success: true });
-  } catch (e: any) {
-    sendMessage.sendKakaoMessage({
-      object_type: "text",
-      text: e.message,
-      link: {
-        mobile_web_url: "",
-        web_url: "",
-      },
-    });
-    res.status(400).send({ success: false, message: e.message });
-  }
-};
+//     await createCollectionAndNFTAndEvent(collectionList);
+//     return res.status(200).json({ success: true });
+//   } catch (e: any) {
+//     sendMessage.sendKakaoMessage({
+//       object_type: "text",
+//       text: e.message,
+//       link: {
+//         mobile_web_url: "",
+//         web_url: "",
+//       },
+//     });
+//     res.status(400).send({ success: false, message: e.message });
+//   }
+// };
 
-export default createCollectionData;
+// export default createCollectionData;
 

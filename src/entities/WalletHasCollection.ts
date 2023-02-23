@@ -4,24 +4,18 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToMany,
-  JoinTable,
 } from "typeorm";
-import { Collection } from "./Collection";
 
 @Entity()
-export class Wallet {
+export class WalletHasCollection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
-  username: string;
+  @Column()
+  walletId: Number;
 
-  @Column({ nullable: true })
-  profileImgUrl: string;
-
-  @Column({ nullable: true })
-  address: string;
+  @Column()
+  collectionId: Number;
 
   @CreateDateColumn()
   createAt: Date;

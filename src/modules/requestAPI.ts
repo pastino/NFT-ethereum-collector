@@ -1,21 +1,44 @@
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import { getRepository } from "typeorm";
 import { makeAxiosErrorText } from "../commons/error";
 import { ERROR_STATUS_CODE } from "../commons/error";
+import { PROXY_LIST } from "../commons/proxyList";
 import { isAxiosError, sleep } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
 import { Collection } from "../entities/Collection";
 import { CollectionEvent } from "../entities/CollectionEvent";
+import { SendMessage } from "./kakaoMessage";
+
+const { protocol, host, port } = PROXY_LIST[0];
 
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
-export class OpenSea {
-  private headerConfig = {
-    headers: {
-      "X-API-KEY": process.env.OPENSEA_API_KEY as string,
-    },
-  };
+export const headerConfig: any = {
+  proxy: false,
+  // httpsAgent: new HttpsProxyAgent("https://198.199.120.102:8080"),
+  httpAgent: new HttpsProxyAgent(`${protocol}://${host}:${port}` as string),
+  headers: {
+    "X-API-KEY": process.env.OPENSEA_API_KEY as string,
+    // "user-agent":
+    //   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
+  },
+};
 
+export class OpenSea {
   constructor() {}
+
+  public getUser = async (walletAddress: string) => {
+    try {
+      const response = await axios.get(
+        `https://api.opensea.io/user/${walletAddress}`,
+        headerConfig
+      );
+
+      return response;
+    } catch (e: any) {
+      throw new Error(e);
+    }
+  };
 
   public getCollection = async (contractAddress: string) => {
     try {
@@ -26,12 +49,12 @@ export class OpenSea {
       if (isAddress) {
         response = await axios.get(
           `https://api.opensea.io/api/v1/asset_contract/${contractAddress}`,
-          this.headerConfig
+          headerConfig
         );
       } else {
         response = await axios.get(
           `https://api.opensea.io/api/v1/collection/${contractAddress}`,
-          this.headerConfig
+          headerConfig
         );
         await sleep(1);
         const nftList = await this.getNFTList(response.data?.collection, "");
@@ -52,7 +75,7 @@ export class OpenSea {
     try {
       const response = await axios.get(
         `https://api.opensea.io/api/v1/collection/${collectionSlug}`,
-        this.headerConfig
+        headerConfig
       );
 
       return response as {
@@ -87,36 +110,30 @@ export class OpenSea {
     try {
       const response = await axios.get(
         `https://api.opensea.io/api/v1/collections?asset_owner=${assetOwner}&offset=${offset}&limit=300`,
-        this.headerConfig
+        headerConfig
       );
 
       return response as {
         status: number;
         data: {}[];
       };
-    } catch (e: unknown) {
-      if (isAxiosError(e)) {
-        throw new Error(
-          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
-            e.response?.data
-          }\n\n*statusText*\n${
-            ERROR_STATUS_CODE[e.response?.status as number]?.statusText
-          }\n\n*statusDescription*\n${
-            ERROR_STATUS_CODE[e.response?.status as number]?.description
-          }`
-        );
-      }
+    } catch (e: any) {
+      const sendMessage = new SendMessage();
+      await sendMessage.sendKakaoMessage({
+        object_type: "text",
+        text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 콜랙션 리스트 가져오기를 다시 실행합니다.`,
+        link: { mobile_web_url: "", web_url: "" },
+      });
+      await sleep(60 * 10);
+      await this.getCollectionList({ assetOwner, offset });
     }
-    throw new Error(
-      "getCollection 함수를 실행하는 중 런타임 에러가 발생하였습니다."
-    );
   };
 
   public getNFTList = async (collectionData: any, cursor: string) => {
     try {
       const response = await axios.get(
         `https://api.opensea.io/api/v1/assets?collection_slug=${collectionData.slug}&cursor=${cursor}`,
-        this.headerConfig
+        headerConfig
       );
       return response as {
         status: number;
@@ -131,7 +148,7 @@ export class OpenSea {
     try {
       const response = await axios.get(
         `https://api.opensea.io/api/v1/asset/${collectionData.address}/${tokenId}`,
-        this.headerConfig
+        headerConfig
       );
 
       return response as {
@@ -180,7 +197,7 @@ export class OpenSea {
         }&event_type=successful&occurred_before=${new Date(
           occurredBefore
         ).getTime()}&cursor=${cursor}`,
-        this.headerConfig
+        headerConfig
       );
 
       return response as {
