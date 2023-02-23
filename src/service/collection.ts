@@ -104,24 +104,24 @@ export class Collection {
       where,
     })) as CollectionEntity;
 
+    const existingWalletHasCollection = await getRepository(
+      WalletHasCollection
+    ).findOne({
+      where: {
+        walletId: walletData.id,
+        collectionId: existingCollectionData.id,
+      },
+    });
+
+    if (!existingWalletHasCollection) {
+      await getRepository(WalletHasCollection).save({
+        walletId: walletData.id,
+        collectionId: existingCollectionData.id,
+      });
+    }
+
     if (existingCollectionData) {
       // 이미 수집된 컬랙션이면 Wallet 연결만 하고 return
-
-      const existingWalletHasCollection = await getRepository(
-        WalletHasCollection
-      ).findOne({
-        where: {
-          walletId: walletData.id,
-          collectionId: existingCollectionData.id,
-        },
-      });
-
-      if (!existingWalletHasCollection) {
-        await getRepository(WalletHasCollection).save({
-          walletId: walletData.id,
-          collectionId: existingCollectionData.id,
-        });
-      }
 
       return true;
     }
