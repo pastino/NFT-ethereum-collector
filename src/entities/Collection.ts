@@ -5,9 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from "typeorm";
 import { CollectionEvent } from "./CollectionEvent";
 import { NFT } from "./NFT";
+import { Wallet } from "./Wallet";
 
 @Entity()
 export class Collection {

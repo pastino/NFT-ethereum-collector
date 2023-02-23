@@ -8,6 +8,7 @@ import { isAxiosError, sleep } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
 import { Collection } from "../entities/Collection";
 import { CollectionEvent } from "../entities/CollectionEvent";
+import { SendMessage } from "./kakaoMessage";
 
 const { protocol, host, port } = PROXY_LIST[0];
 
@@ -28,16 +29,13 @@ export class OpenSea {
 
   public getUser = async (walletAddress: string) => {
     try {
-      console.log(123);
       const response = await axios.get(
         `https://api.opensea.io/user/${walletAddress}`,
         headerConfig
       );
-      console.log(response?.config);
 
       return response;
     } catch (e: any) {
-      console.log(e?.config?.httpsAgent);
       throw new Error(e);
     }
   };
@@ -119,23 +117,16 @@ export class OpenSea {
         status: number;
         data: {}[];
       };
-    } catch (e: unknown) {
-      console.log("get collection error", e);
-      if (isAxiosError(e)) {
-        throw new Error(
-          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
-            e.response?.data
-          }\n\n*statusText*\n${
-            ERROR_STATUS_CODE[e.response?.status as number]?.statusText
-          }\n\n*statusDescription*\n${
-            ERROR_STATUS_CODE[e.response?.status as number]?.description
-          }`
-        );
-      }
+    } catch (e: any) {
+      const sendMessage = new SendMessage();
+      await sendMessage.sendKakaoMessage({
+        object_type: "text",
+        text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 콜랙션 리스트 가져오기를 다시 실행합니다.`,
+        link: { mobile_web_url: "", web_url: "" },
+      });
+      await sleep(60 * 10);
+      await this.getCollectionList({ assetOwner, offset });
     }
-    throw new Error(
-      "getCollection 함수를 실행하는 중 런타임 에러가 발생하였습니다."
-    );
   };
 
   public getNFTList = async (collectionData: any, cursor: string) => {

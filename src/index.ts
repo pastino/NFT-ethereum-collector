@@ -5,10 +5,11 @@ import cors from "cors";
 import morgan from "morgan";
 import { createConnection } from "typeorm";
 import connectionOptions from "./ormconfig";
-import createCollectionData from "./routes/createCollectionData";
+// import createCollectionData from "./routes/createCollectionData";
 import kakaoAuthorization from "./routes/kakaoAuthorization";
 import deleteCollectionData from "./routes/deleteCollectionData";
 import createWalletAndCollection from "./routes/createWalletAndCollection";
+import { sleep } from "./commons/utils";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -25,7 +26,7 @@ app.use(
 );
 
 app.post("/wallet", createWalletAndCollection);
-app.post("/collection", createCollectionData);
+// app.post("/collection", createCollectionData);
 app.delete("/collection", deleteCollectionData);
 app.post("/kakao/auth", kakaoAuthorization);
 
