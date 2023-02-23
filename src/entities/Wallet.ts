@@ -4,10 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToMany,
-  JoinTable,
+  OneToMany,
 } from "typeorm";
-import { Collection } from "./Collection";
+import { WalletHasCollection } from "./WalletHasCollection";
 
 @Entity()
 export class Wallet {
@@ -22,6 +21,15 @@ export class Wallet {
 
   @Column({ nullable: true })
   address: string;
+
+  @OneToMany(
+    () => WalletHasCollection,
+    (walletHasCollection) => walletHasCollection.walletId,
+    {
+      onDelete: "CASCADE",
+    }
+  )
+  walletHasCollection: WalletHasCollection[];
 
   @CreateDateColumn()
   createAt: Date;
