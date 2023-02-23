@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import { OpenSea } from "../modules/requestAPI";
 import moment from "moment";
 import { addHours } from "../commons/utils";
