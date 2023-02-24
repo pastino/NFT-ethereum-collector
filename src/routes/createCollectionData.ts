@@ -27,7 +27,6 @@ export const createCollectionAndNFTAndEvent = async ({
       const { collectionData, code } = await collectionClass.createCollection(
         walletData
       );
-      console.log(2);
       // 이미 생성된 컬랙션이라면 다음 컬랙션 생성으로 넘어감
       if (!collectionData || code === RETURN_CODE_ENUM["이미 생성된 컬랙션"])
         continue;

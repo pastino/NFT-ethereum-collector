@@ -104,6 +104,9 @@ export class CollectionEvent {
   @JoinColumn({ name: "winnerAccount", referencedColumnName: "id" })
   winnerAccount: number;
 
+  @Column({ nullable: true })
+  sessionUUID: string;
+
   @CreateDateColumn()
   createAt: Date;
   @UpdateDateColumn()
