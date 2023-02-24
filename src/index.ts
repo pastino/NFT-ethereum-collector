@@ -44,7 +44,6 @@ createConnection(connectionOptions)
       for (let i = 0; i < collectionList.length; i++) {
         const collection = collectionList[i];
         const uuid = uuidv4();
-
         await getRepository(Collection).update(
           { id: collection.id },
           {
@@ -74,7 +73,7 @@ createConnection(connectionOptions)
             }
           );
         }
-        console.log("완료");
+        console.log("완료1");
       }
     });
   })
