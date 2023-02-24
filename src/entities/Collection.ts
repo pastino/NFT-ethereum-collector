@@ -91,6 +91,15 @@ export class Collection {
   @Column({ nullable: true })
   wikiUrl: string;
 
+  @Column({ nullable: true })
+  sessionUUID: string;
+
+  @Column({ default: false })
+  isCompletedInitialUpdate: boolean;
+
+  @Column({ default: true })
+  isCompletedUpdate: boolean;
+
   @OneToMany(() => NFT, (nft) => nft.collectionId, {
     onDelete: "CASCADE",
   })

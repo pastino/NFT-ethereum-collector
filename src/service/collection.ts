@@ -105,7 +105,6 @@ export class Collection {
       where,
     })) as CollectionEntity;
 
-    console.log(1);
     if (existingCollectionData) {
       // 이미 수집된 컬랙션이면 Wallet 연결만 하고 return
       const existingWalletHasCollection = await getRepository(
