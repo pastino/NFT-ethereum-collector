@@ -79,6 +79,10 @@ jobs:
           cd ~/ethereum-collector
           npx pm2 install typescript
           npm run start &
+          cd ..
+      - uses: actions/checkout@v2
+        with:
+          clean: false
 
     # # 두번째
     # build:
