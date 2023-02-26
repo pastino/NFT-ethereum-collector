@@ -38,43 +38,6 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-
-      const collectionList = await getRepository(Collection).find();
-
-      for (let i = 0; i < collectionList.length; i++) {
-        const collection = collectionList[i];
-        const uuid = uuidv4();
-        await getRepository(Collection).update(
-          { id: collection.id },
-          {
-            sessionUUID: uuid,
-            isCompletedInitialUpdate: true,
-            isCompletedUpdate: true,
-          }
-        );
-
-        const eventList = await getRepository(CollectionEvent).find({
-          where: {
-            collectionId: collection.id,
-          },
-        });
-
-        for (let j = 0; j < eventList.length; j++) {
-          console.log(
-            `${i} / ${collectionList.length}, ${j} / ${eventList.length}`
-          );
-          const event = eventList[j];
-          await getRepository(CollectionEvent).update(
-            {
-              id: event.id,
-            },
-            {
-              sessionUUID: uuid,
-            }
-          );
-        }
-        console.log("완료");
-      }
     });
   })
   .catch((error) => {
