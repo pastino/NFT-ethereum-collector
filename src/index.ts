@@ -9,10 +9,6 @@ import connectionOptions from "./ormconfig";
 import kakaoAuthorization from "./routes/kakaoAuthorization";
 import deleteCollectionData from "./routes/deleteCollectionData";
 import createWalletAndCollection from "./routes/createWalletAndCollection";
-import { sleep } from "./commons/utils";
-import { CollectionEvent } from "./entities/CollectionEvent";
-import { Collection } from "./entities/Collection";
-import { v4 as uuidv4 } from "uuid";
 
 const app = express();
 const PORT = process.env.PORT;
