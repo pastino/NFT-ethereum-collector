@@ -7,6 +7,10 @@ module.exports = {
       autorestart: false,
       instances: 1,
       exec_mode: "fork",
+      env: {
+        NODE_ENV: "production",
+        port: 5001,
+      },
     },
     {
       name: "collector2",
@@ -15,6 +19,10 @@ module.exports = {
       autorestart: false,
       instances: 1,
       exec_mode: "fork",
+      env: {
+        NODE_ENV: "production",
+        port: 5002,
+      },
     },
   ],
 };
