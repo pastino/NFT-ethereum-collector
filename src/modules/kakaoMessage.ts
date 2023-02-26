@@ -66,6 +66,8 @@ export class SendMessage {
       const response = await axios({
         method: "post",
         url: `https://kauth.kakao.com/oauth/token`,
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
         params: {
           grant_type: "refresh_token",
           client_id: process.env.KAKAO_CLIENT_ID,
@@ -112,6 +114,8 @@ export class SendMessage {
         params: {
           template_object: `${kakaoTemplateObject} PORT - ${process.env.PORT}`,
         },
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
