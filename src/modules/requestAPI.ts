@@ -4,7 +4,6 @@ import { getRepository } from "typeorm";
 import { AXIOS_PROXY_OPTION } from "..";
 import { makeAxiosErrorText } from "../commons/error";
 import { ERROR_STATUS_CODE } from "../commons/error";
-import { PROXY_LIST } from "../commons/proxyList";
 import { isAxiosError, sleep } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
 import { Collection } from "../entities/Collection";

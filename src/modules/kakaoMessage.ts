@@ -91,7 +91,8 @@ export class SendMessage {
   };
 
   public sendKakaoMessage = async (
-    kakaoTemplateObject: TextTypeKakaoTemplate | FeedTypeKakaoTemplate
+    kakaoTemplateObject: TextTypeKakaoTemplate
+    //  | FeedTypeKakaoTemplate
   ) => {
     let tokenData = await this.getKakaoToken();
 
@@ -110,7 +111,10 @@ export class SendMessage {
         method: "post",
         url: `https://kapi.kakao.com/v2/api/talk/memo/default/send`,
         params: {
-          template_object: `${kakaoTemplateObject} PORT - ${process.env.PORT}`,
+          template_object: {
+            ...kakaoTemplateObject,
+            text: `${kakaoTemplateObject?.text}  PORT - ${process.env.PORT}}`,
+          },
         },
         headers: {
           "Content-Type": "application/json",

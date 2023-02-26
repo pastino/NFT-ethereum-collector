@@ -10,14 +10,13 @@ import deleteCollectionData from "./routes/deleteCollectionData";
 import createWalletAndCollection from "./routes/createWalletAndCollection";
 import { Collection } from "./entities/Collection";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { SendMessage } from "./modules/kakaoMessage";
 
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
-export const AXIOS_PROXY_OPTION = IS_PRODUCTION
-  ? {
-      proxy: false,
-      httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
-    }
-  : {};
+export const AXIOS_PROXY_OPTION = {
+  proxy: false,
+  httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+};
 
 const app = express();
 const PORT = IS_PRODUCTION ? process.env.PORT : 4000;
@@ -56,6 +55,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
+
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
