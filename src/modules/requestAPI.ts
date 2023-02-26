@@ -1,7 +1,7 @@
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { getRepository } from "typeorm";
-import { AXIOS_PROXY_OPTION } from "..";
+import { IS_PRODUCTION } from "..";
 import { makeAxiosErrorText } from "../commons/error";
 import { ERROR_STATUS_CODE } from "../commons/error";
 import { isAxiosError, sleep } from "../commons/utils";
@@ -12,7 +12,10 @@ import { SendMessage } from "./kakaoMessage";
 
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
 export const headerConfig: any = {
-  ...(AXIOS_PROXY_OPTION as any),
+  ...(IS_PRODUCTION && {
+    proxy: false,
+    httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+  }),
   headers: {
     "X-API-KEY": process.env.OPENSEA_API_KEY as string,
     // "user-agent":
