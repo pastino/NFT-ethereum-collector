@@ -168,7 +168,7 @@ export class Event {
     }
   };
 
-  private insertEventList = async (assetEvents: any[]) => {
+  private insertEventList = async (assetEvents: any[], uuid: string) => {
     for (let i = 0; i < assetEvents.length; i++) {
       console.log(
         `<Event 생성> ${this.page}번째 페이지의 ${i + 1}/${
@@ -222,11 +222,12 @@ export class Event {
         seller: getUserId("seller"),
         toAccount: getUserId("toAccount"),
         winnerAccount: getUserId("winnerAccount"),
+        sessionUUID: uuid,
       });
     }
   };
 
-  public createEventList = async () => {
+  public createEventList = async (uuid: string) => {
     try {
       // 이전에 이벤트 데이터 쌓는 도중 오류로 인해 중단된 기록있는지 확인.
       // 있다면 occurredBefore 상태값 업데이트
@@ -241,7 +242,7 @@ export class Event {
         // 이벤트 데이터 리스트 가져오기
         const assetEvents = await this.getEventList();
         // 이벤트 데이터 저장
-        await this.insertEventList(assetEvents);
+        await this.insertEventList(assetEvents, uuid);
         this.page += 1;
       }
     } catch (e: any) {
@@ -256,7 +257,7 @@ export class Event {
         text: `Event 재수집 시작`,
         link: { mobile_web_url: "", web_url: "" },
       });
-      await this.createEventList();
+      await this.createEventList(uuid);
 
       // const response = JSON.parse(JSON.stringify(e));
       // if (typeof response === "object") {

@@ -5,6 +5,7 @@ import { FeedTypeKakaoTemplate, TextTypeKakaoTemplate } from "./types";
 import { Collection } from "../entities/Collection";
 import moment from "moment";
 import { isAxiosError } from "../commons/utils";
+import { AXIOS_PROXY_OPTION } from "..";
 
 export class Message {
   constructor() {}
@@ -70,6 +71,7 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
+        ...(AXIOS_PROXY_OPTION as any),
       });
 
       const data = response?.data;
@@ -108,12 +110,13 @@ export class SendMessage {
         method: "post",
         url: `https://kapi.kakao.com/v2/api/talk/memo/default/send`,
         params: {
-          template_object: kakaoTemplateObject,
+          template_object: `${kakaoTemplateObject} PORT - ${process.env.PORT}`,
         },
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
+        ...(AXIOS_PROXY_OPTION as any),
       });
 
       const resultCode = response?.data?.result_code;

@@ -5,6 +5,7 @@ import { CreateEntityData } from "../modules/manufactureData";
 import { KakaoAccessToken } from "../entities/KakaoAccessToken";
 import { isAxiosError } from "../commons/utils";
 import { SendMessage } from "../modules/kakaoMessage";
+import { AXIOS_PROXY_OPTION } from "..";
 
 const kakaoAuthorization = async (req: Request, res: Response) => {
   try {
@@ -24,6 +25,7 @@ const kakaoAuthorization = async (req: Request, res: Response) => {
       headers: {
         "Content-Type": "application/json",
       },
+      ...(AXIOS_PROXY_OPTION as any),
     });
 
     const createEntityData = new CreateEntityData({
