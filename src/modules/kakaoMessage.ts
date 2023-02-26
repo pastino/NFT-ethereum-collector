@@ -5,8 +5,8 @@ import { FeedTypeKakaoTemplate, TextTypeKakaoTemplate } from "./types";
 import { Collection } from "../entities/Collection";
 import moment from "moment";
 import { isAxiosError } from "../commons/utils";
-import { IS_PRODUCTION } from "..";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { HTTPS_PROXY } from "..";
 
 export class Message {
   constructor() {}
@@ -72,10 +72,8 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
-        ...(IS_PRODUCTION && {
-          proxy: false,
-          httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
-        }),
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(HTTPS_PROXY as string),
       });
 
       const data = response?.data;
@@ -124,10 +122,8 @@ export class SendMessage {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        ...(IS_PRODUCTION && {
-          proxy: false,
-          httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
-        }),
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(HTTPS_PROXY as string),
       });
 
       const resultCode = response?.data?.result_code;
