@@ -55,27 +55,3 @@ export const createCollectionAndNFTAndEvent = async ({
     throw new Error(e.message);
   }
 };
-
-// const createCollectionData = async (req: Request, res: Response) => {
-//   try {
-//     const {
-//       body: { collectionList },
-//     }: { body: { collectionList: string[] } } = req;
-
-//     await createCollectionAndNFTAndEvent(collectionList);
-//     return res.status(200).json({ success: true });
-//   } catch (e: any) {
-//     sendMessage.sendKakaoMessage({
-//       object_type: "text",
-//       text: e.message,
-//       link: {
-//         mobile_web_url: "",
-//         web_url: "",
-//       },
-//     });
-//     res.status(400).send({ success: false, message: e.message });
-//   }
-// };
-
-// export default createCollectionData;
-
