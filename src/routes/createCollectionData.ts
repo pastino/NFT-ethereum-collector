@@ -4,10 +4,12 @@ import { addHours } from "../commons/utils";
 import { Event } from "../service/event";
 import { SendMessage } from "../modules/kakaoMessage";
 import { Collection } from "../service/collection";
+import { Collection as CollectionEntity } from "../entities/Collection";
 import { NFT } from "../service/nft";
 import { RETURN_CODE_ENUM } from "../commons/return";
 import { Wallet } from "../entities/Wallet";
-
+import { v4 as uuidv4 } from "uuid";
+import { getRepository } from "typeorm";
 // TODO 절대경로 생성
 // TODO 오픈시 리턴 값 중 key값 변화가 있는지 확인
 const sendMessage = new SendMessage();
@@ -24,9 +26,13 @@ export const createCollectionAndNFTAndEvent = async ({
       const targetData: string = collectionList[i];
       const openSeaAPI = new OpenSea();
       const collectionClass = new Collection({ targetData, openSeaAPI });
+      const uuid = uuidv4();
+
       const { collectionData, code } = await collectionClass.createCollection(
-        walletData
+        walletData,
+        uuid
       );
+
       // 이미 생성된 컬랙션이라면 다음 컬랙션 생성으로 넘어감
       if (!collectionData || code === RETURN_CODE_ENUM["이미 생성된 컬랙션"])
         continue;
@@ -38,8 +44,17 @@ export const createCollectionAndNFTAndEvent = async ({
         collectionData: collectionData,
         openSeaAPI,
       });
-      await event.createEventList();
+      await event.createEventList(uuid);
 
+      await getRepository(CollectionEntity).update(
+        {
+          id: collectionData.id,
+        },
+        {
+          isCompletedInitialUpdate: true,
+          isCompletedUpdate: true,
+        }
+      );
       // 컬랙션 데이터 생성 완료 메세지 보내기
       await sendMessage.sendKakaoMessage({
         object_type: "text",
