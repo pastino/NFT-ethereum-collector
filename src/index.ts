@@ -47,6 +47,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
+      console.log(process.env.NODE_ENV);
       if (process.env.NODE_ENV === "production") {
         await deleteNotCompleteCollection();
       }
