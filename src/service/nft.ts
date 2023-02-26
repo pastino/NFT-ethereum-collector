@@ -8,6 +8,7 @@ import { SendMessage } from "../modules/kakaoMessage";
 import { CreateEntityData } from "../modules/manufactureData";
 import { OpenSea } from "../modules/requestAPI";
 const sendMessage = new SendMessage();
+
 export class NFT {
   private collectionData: Collection;
   private openSeaAPI: OpenSea;
