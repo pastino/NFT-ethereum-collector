@@ -9,10 +9,18 @@ import kakaoAuthorization from "./routes/kakaoAuthorization";
 import deleteCollectionData from "./routes/deleteCollectionData";
 import createWalletAndCollection from "./routes/createWalletAndCollection";
 import { Collection } from "./entities/Collection";
+import { HttpsProxyAgent } from "https-proxy-agent";
+
+export const IS_PRODUCTION = process.env.NODE_ENV === "production";
+export const AXIOS_PROXY_OPTION = IS_PRODUCTION
+  ? {
+      proxy: false,
+      httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+    }
+  : {};
 
 const app = express();
-const PORT = process.env.PORT;
-
+const PORT = IS_PRODUCTION ? process.env.PORT : 4000;
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -32,11 +40,12 @@ const deleteNotCompleteCollection = async () => {
   try {
     await getRepository(Collection)
       .createQueryBuilder("collection")
+      .delete()
       .where(
         "collection.isCompletedInitialUpdate = :isCompletedInitialUpdate OR collection.isCompletedUpdate = :isCompletedUpdate",
         { isCompletedInitialUpdate: false, isCompletedUpdate: false }
       )
-      .delete();
+      .execute();
   } catch (e) {
     console.log(e);
   }
@@ -47,8 +56,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      console.log(process.env.NODE_ENV);
-      if (process.env.NODE_ENV === "production") {
+      if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
     });
