@@ -25,7 +25,8 @@ export class Collection {
   }
 
   createCollection = async (
-    walletData: Wallet
+    walletData: Wallet,
+    uuid: string
   ): Promise<{
     isSuccess: boolean;
     collectionData: CollectionEntity | null;
@@ -55,9 +56,12 @@ export class Collection {
         filterList: ["id"],
       });
       // 컬랙션 데이터 Insert
-      const collectionData = await getRepository(CollectionEntity).save(
-        createEntityData.createTableRowData()
-      );
+      const collectionData = await getRepository(CollectionEntity).save({
+        ...createEntityData.createTableRowData(),
+        sessionUUID: uuid,
+        isCompletedInitialUpdate: false,
+        isCompletedUpdate: false,
+      });
 
       await getRepository(WalletHasCollection).save({
         walletId: walletData.id,
@@ -77,7 +81,7 @@ export class Collection {
         link: { mobile_web_url: "", web_url: "" },
       });
       await sleep(60 * 10);
-      await this.createCollection(walletData);
+      await this.createCollection(walletData, uuid);
 
       // 실행안되는 Return
       return {
