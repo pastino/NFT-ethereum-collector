@@ -43,7 +43,7 @@ jobs:
         run: |
           cd ~/ethereum-collector1
           touch .env
-          echo PORT=5002 >> .env
+          echo PORT=${{ secrets.PORT1 }} >> .env
           echo SECRET=${{ secrets.SECRET }} >> .env
           echo AWS_ACCESS_ID=${{ secrets.AWS_ACCESS_ID }} >> .env
           echo AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} >> .env
@@ -61,7 +61,7 @@ jobs:
       - name: Run new server (in background)
         env:
           RUNNER_TRACKING_ID: "1"
-          PORT: ${{ secrets.PORT }}
+          PORT: ${{ secrets.PORT1 }}
           SECRET: ${{ secrets.SECRET }}
           AWS_ACCESS_ID: ${{ secrets.AWS_ACCESS_ID }}
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
@@ -110,7 +110,7 @@ jobs:
         run: |
           cd ~/ethereum-collector2
           touch .env
-          echo PORT=5003 >> .env
+          echo PORT=${{ secrets.PORT2 }} >> .env
           echo SECRET=${{ secrets.SECRET }} >> .env
           echo AWS_ACCESS_ID=${{ secrets.AWS_ACCESS_ID }} >> .env
           echo AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} >> .env
@@ -128,7 +128,7 @@ jobs:
       - name: Run new server (in background)
         env:
           RUNNER_TRACKING_ID: "2"
-          PORT: ${{ secrets.PORT }}
+          PORT: ${{ secrets.PORT2 }}
           SECRET: ${{ secrets.SECRET }}
           AWS_ACCESS_ID: ${{ secrets.AWS_ACCESS_ID }}
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
