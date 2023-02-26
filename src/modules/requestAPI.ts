@@ -13,7 +13,7 @@ import { SendMessage } from "./kakaoMessage";
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
 export const headerConfig: any = {
   proxy: false,
-  httpAgent: new HttpsProxyAgent(HTTPS_PROXY as string),
+  httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
   headers: {
     "X-API-KEY": process.env.OPENSEA_API_KEY as string,
     // "user-agent":
