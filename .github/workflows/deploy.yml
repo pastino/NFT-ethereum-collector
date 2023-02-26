@@ -43,7 +43,6 @@ jobs:
         run: |
           cd ~/ethereum-collector1
           touch .env
-          echo PORT=${{ secrets.PORT }} >> .env
           echo SECRET=${{ secrets.SECRET }} >> .env
           echo AWS_ACCESS_ID=${{ secrets.AWS_ACCESS_ID }} >> .env
           echo AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} >> .env
@@ -110,7 +109,6 @@ jobs:
         run: |
           cd ~/ethereum-collector2
           touch .env
-          echo PORT=${{ secrets.PORT }} >> .env
           echo SECRET=${{ secrets.SECRET }} >> .env
           echo AWS_ACCESS_ID=${{ secrets.AWS_ACCESS_ID }} >> .env
           echo AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} >> .env
