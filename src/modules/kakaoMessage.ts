@@ -5,6 +5,7 @@ import { FeedTypeKakaoTemplate, TextTypeKakaoTemplate } from "./types";
 import { Collection } from "../entities/Collection";
 import moment from "moment";
 import { isAxiosError } from "../commons/utils";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export class Message {
   constructor() {}
@@ -65,6 +66,8 @@ export class SendMessage {
       const response = await axios({
         method: "post",
         url: `https://kauth.kakao.com/oauth/token`,
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
         params: {
           grant_type: "refresh_token",
           client_id: process.env.KAKAO_CLIENT_ID,
@@ -108,8 +111,10 @@ export class SendMessage {
         method: "post",
         url: `https://kapi.kakao.com/v2/api/talk/memo/default/send`,
         params: {
-          template_object: kakaoTemplateObject,
+          template_object: `${kakaoTemplateObject} PORT - ${process.env.PORT}`,
         },
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,

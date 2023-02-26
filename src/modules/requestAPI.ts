@@ -10,13 +10,11 @@ import { Collection } from "../entities/Collection";
 import { CollectionEvent } from "../entities/CollectionEvent";
 import { SendMessage } from "./kakaoMessage";
 
-const { protocol, host, port } = PROXY_LIST[0];
-
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
 export const headerConfig: any = {
   proxy: false,
   // httpsAgent: new HttpsProxyAgent("https://198.199.120.102:8080"),
-  httpAgent: new HttpsProxyAgent(`${protocol}://${host}:${port}` as string),
+  httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
   headers: {
     "X-API-KEY": process.env.OPENSEA_API_KEY as string,
     // "user-agent":
