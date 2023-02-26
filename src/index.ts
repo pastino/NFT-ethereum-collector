@@ -9,9 +9,12 @@ import kakaoAuthorization from "./routes/kakaoAuthorization";
 import deleteCollectionData from "./routes/deleteCollectionData";
 import createWalletAndCollection from "./routes/createWalletAndCollection";
 import { Collection } from "./entities/Collection";
+import { PROXY_LIST } from "./commons/proxyList";
 
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
-
+export const HTTPS_PROXY = IS_PRODUCTION
+  ? process.env.HTTPS_PROXY
+  : `http://${PROXY_LIST[0].port}:${PROXY_LIST[0].protocol}`;
 const app = express();
 const PORT = IS_PRODUCTION ? process.env.PORT : 4000;
 app.use(morgan("dev"));
