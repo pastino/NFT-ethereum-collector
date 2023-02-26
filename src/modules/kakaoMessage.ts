@@ -114,8 +114,6 @@ export class SendMessage {
         params: {
           template_object: `${kakaoTemplateObject} PORT - ${process.env.PORT}`,
         },
-        proxy: false,
-        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
