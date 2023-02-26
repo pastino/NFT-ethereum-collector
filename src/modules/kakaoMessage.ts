@@ -5,6 +5,8 @@ import { FeedTypeKakaoTemplate, TextTypeKakaoTemplate } from "./types";
 import { Collection } from "../entities/Collection";
 import moment from "moment";
 import { isAxiosError } from "../commons/utils";
+import { IS_PRODUCTION } from "..";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export class Message {
   constructor() {}
@@ -70,6 +72,10 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
+        ...(IS_PRODUCTION && {
+          proxy: false,
+          httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+        }),
       });
 
       const data = response?.data;
@@ -89,7 +95,8 @@ export class SendMessage {
   };
 
   public sendKakaoMessage = async (
-    kakaoTemplateObject: TextTypeKakaoTemplate | FeedTypeKakaoTemplate
+    kakaoTemplateObject: TextTypeKakaoTemplate
+    //  | FeedTypeKakaoTemplate
   ) => {
     let tokenData = await this.getKakaoToken();
 
@@ -108,12 +115,19 @@ export class SendMessage {
         method: "post",
         url: `https://kapi.kakao.com/v2/api/talk/memo/default/send`,
         params: {
-          template_object: kakaoTemplateObject,
+          template_object: {
+            ...kakaoTemplateObject,
+            text: `${kakaoTemplateObject?.text}  PORT - ${process.env.PORT}}`,
+          },
         },
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
+        ...(IS_PRODUCTION && {
+          proxy: false,
+          httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+        }),
       });
 
       const resultCode = response?.data?.result_code;
