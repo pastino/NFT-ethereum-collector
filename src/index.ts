@@ -9,7 +9,6 @@ import kakaoAuthorization from "./routes/kakaoAuthorization";
 import deleteCollectionData from "./routes/deleteCollectionData";
 import createWalletAndCollection from "./routes/createWalletAndCollection";
 import { Collection } from "./entities/Collection";
-import { HttpsProxyAgent } from "https-proxy-agent";
 
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
