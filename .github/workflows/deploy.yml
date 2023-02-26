@@ -1,5 +1,5 @@
 name: App install and start
-#
+
 concurrency:
   group: production
   cancel-in-progress: true
