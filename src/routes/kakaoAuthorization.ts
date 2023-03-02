@@ -5,7 +5,6 @@ import { CreateEntityData } from "../modules/manufactureData";
 import { KakaoAccessToken } from "../entities/KakaoAccessToken";
 import { isAxiosError } from "../commons/utils";
 import { SendMessage } from "../modules/kakaoMessage";
-import { HttpsProxyAgent } from "https-proxy-agent";
 
 const kakaoAuthorization = async (req: Request, res: Response) => {
   try {
@@ -25,8 +24,10 @@ const kakaoAuthorization = async (req: Request, res: Response) => {
       headers: {
         "Content-Type": "application/json",
       },
-      proxy: false,
-      httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+      proxy: {
+        host: process.env.PROXY_HOST,
+        port: process.env.PROXY_PORT,
+      } as never,
     });
 
     const createEntityData = new CreateEntityData({

@@ -1,7 +1,5 @@
 import axios from "axios";
-import { HttpsProxyAgent } from "https-proxy-agent";
 import { getRepository } from "typeorm";
-import { HTTPS_PROXY, IS_PRODUCTION } from "..";
 import { makeAxiosErrorText } from "../commons/error";
 import { ERROR_STATUS_CODE } from "../commons/error";
 import { isAxiosError, sleep } from "../commons/utils";
@@ -12,8 +10,12 @@ import { SendMessage } from "./kakaoMessage";
 
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
 export const headerConfig: any = {
-  proxy: false,
-  httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+  proxy: {
+    host: process.env.PROXY_HOST,
+    port: process.env.PROXY_PORT,
+  },
+  // httpsAgent: agent,
+  // httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
   headers: {
     "X-API-KEY": process.env.OPENSEA_API_KEY as string,
     // "user-agent":
@@ -105,6 +107,7 @@ export class OpenSea {
     offset: number;
   }) => {
     try {
+      console.log(1);
       const response = await axios.get(
         `https://api.opensea.io/api/v1/collections?asset_owner=${assetOwner}&offset=${offset}&limit=300`,
         headerConfig
@@ -115,6 +118,7 @@ export class OpenSea {
         data: {}[];
       };
     } catch (e: any) {
+      console.log(e.message);
       const sendMessage = new SendMessage();
       await sendMessage.sendKakaoMessage({
         object_type: "text",
