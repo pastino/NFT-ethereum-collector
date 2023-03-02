@@ -70,10 +70,6 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
-        proxy: {
-          host: process.env.PROXY_HOST,
-          port: process.env.PROXY_PORT,
-        } as never,
       });
 
       const data = response?.data;
@@ -122,10 +118,6 @@ export class SendMessage {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        proxy: {
-          host: process.env.PROXY_HOST,
-          port: process.env.PROXY_PORT,
-        } as never,
       });
 
       const resultCode = response?.data?.result_code;
