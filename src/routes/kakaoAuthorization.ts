@@ -24,10 +24,6 @@ const kakaoAuthorization = async (req: Request, res: Response) => {
       headers: {
         "Content-Type": "application/json",
       },
-      proxy: {
-        host: process.env.PROXY_HOST,
-        port: process.env.PROXY_PORT,
-      } as never,
     });
 
     const createEntityData = new CreateEntityData({
