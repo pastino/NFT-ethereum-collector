@@ -7411,7 +7411,7 @@ export const PROXY_LIST = [
   },
 ];
 
-const PROXY_LIST_2 = [
+export const PROXY_LIST_2 = [
   {
     host: "31.186.239.245",
     pory: 8080,

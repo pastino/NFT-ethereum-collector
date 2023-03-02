@@ -12,6 +12,7 @@ module.exports = {
         PORT: 5001,
         PROXY_HOST: "13.95.173.197",
         PROXY_PORT: 80,
+        HTTPS_PROXY: "http://13.95.173.197:80",
       },
     },
     {
@@ -24,9 +25,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5002,
-
         PROXY_HOST: "117.74.65.215",
         PROXY_PORT: 10443,
+        HTTPS_PROXY: "http://117.74.65.215:10443",
       },
     },
     {
@@ -39,9 +40,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5003,
-
         PROXY_HOST: "117.74.65.215",
         PROXY_PORT: 7890,
+        HTTPS_PROXY: "http://117.74.65.215:7890",
       },
     },
     {
@@ -55,8 +56,8 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 5004,
         PROXY_HOST: "135.181.15.198",
-        PROXY_HOST: "117.74.65.215",
-        PROXY_PORT: 8888,
+        PROXY_PORT: 3128,
+        HTTPS_PROXY: "http://135.181.15.198:3128",
       },
     },
     {
@@ -71,6 +72,7 @@ module.exports = {
         PORT: 5005,
         PROXY_HOST: "117.74.65.215",
         PROXY_PORT: 8081,
+        HTTPS_PROXY: "http://117.74.65.215:8081",
       },
     },
     {
@@ -85,6 +87,7 @@ module.exports = {
         PORT: 5006,
         PROXY_HOST: "104.43.230.151",
         PROXY_PORT: 3128,
+        HTTPS_PROXY: "http://104.43.230.151:3128",
       },
     },
     {
@@ -99,6 +102,7 @@ module.exports = {
         PORT: 5007,
         PROXY_HOST: "117.74.65.215",
         PROXY_PORT: 84,
+        HTTPS_PROXY: "http://117.74.65.215:84",
       },
     },
     {
@@ -113,6 +117,7 @@ module.exports = {
         PORT: 5008,
         PROXY_HOST: "117.74.65.215",
         PROXY_PORT: 8082,
+        HTTPS_PROXY: "http://117.74.65.215:8082",
       },
     },
     {
@@ -127,6 +132,7 @@ module.exports = {
         PORT: 5009,
         PROXY_HOST: "117.74.65.215",
         PROXY_PORT: 8282,
+        HTTPS_PROXY: "http://117.74.65.215:8282",
       },
     },
     {
@@ -141,6 +147,7 @@ module.exports = {
         PORT: 5010,
         PROXY_HOST: "117.74.65.215",
         PROXY_PORT: 87,
+        HTTPS_PROXY: "http://117.74.65.215:87",
       },
     },
   ],
