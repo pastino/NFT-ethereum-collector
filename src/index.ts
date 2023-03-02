@@ -44,7 +44,6 @@ const deleteNotCompleteCollection = async () => {
         { isCompletedInitialUpdate: false, isCompletedUpdate: false }
       )
       .execute();
-    console.log(2);
   } catch (e) {
     console.log(e);
   }

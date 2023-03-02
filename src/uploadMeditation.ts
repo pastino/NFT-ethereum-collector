@@ -23,7 +23,6 @@ const upload = multer({
           : file.fieldname === "thumbnail"
           ? "images/"
           : "";
-      console.log(basePath);
       cb(null, basePath + Date.now().toString() + "_" + file.originalname);
     },
   }),
