@@ -112,7 +112,6 @@ export class OpenSea {
         `https://api.opensea.io/api/v1/collections?asset_owner=${assetOwner}&offset=${offset}&limit=300`,
         headerConfig
       );
-      console.log("response", response);
       return response as {
         status: number;
         data: {}[];
