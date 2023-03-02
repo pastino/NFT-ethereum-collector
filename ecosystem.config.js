@@ -10,9 +10,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5001,
-        PROXY_HOST: "135.181.15.198",
+        PROXY_HOST: "104.43.230.151",
         PROXY_PORT: "3128",
-        HTTPS_PROXY: "http://135.181.15.198:3128",
+        HTTPS_PROXY: "http://104.43.230.151:3128",
       },
     },
     {
@@ -40,9 +40,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5003,
-        PROXY_HOST: "149.28.125.186",
-        PROXY_PORT: "38080",
-        HTTPS_PROXY: "http://149.28.125.186:38080",
+        PROXY_HOST: "104.43.230.151",
+        PROXY_PORT: "3128",
+        HTTPS_PROXY: "http://104.43.230.151:3128",
       },
     },
     {
@@ -55,9 +55,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5004,
-        PROXY_HOST: "199.5.133.194",
-        PROXY_PORT: "80",
-        HTTPS_PROXY: "http://199.5.133.194:80",
+        PROXY_HOST: "104.43.230.151",
+        PROXY_PORT: "3128",
+        HTTPS_PROXY: "http://104.43.230.151:3128",
       },
     },
     {
@@ -70,9 +70,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5005,
-        PROXY_HOST: "1.224.3.122",
-        PROXY_PORT: "3888",
-        HTTPS_PROXY: "http://1.224.3.122:3888",
+        PROXY_HOST: "104.43.230.151",
+        PROXY_PORT: "3128",
+        HTTPS_PROXY: "http://104.43.230.151:3128",
       },
     },
     {
@@ -85,9 +85,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5006,
-        PROXY_HOST: "45.56.119.212",
-        PROXY_PORT: "8015",
-        HTTPS_PROXY: "http://45.56.119.212:8015",
+        PROXY_HOST: "13.95.173.197",
+        PROXY_PORT: "80",
+        HTTPS_PROXY: "http://13.95.173.197:80",
       },
     },
     {
@@ -115,9 +115,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5008,
-        PROXY_HOST: "135.181.15.198",
-        PROXY_PORT: "3128",
-        HTTPS_PROXY: "http://135.181.15.198:3128",
+        PROXY_HOST: "13.95.173.197",
+        PROXY_PORT: "80",
+        HTTPS_PROXY: "http://13.95.173.197:80",
       },
     },
     {
@@ -130,9 +130,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5009,
-        PROXY_HOST: "104.43.230.151",
-        PROXY_PORT: "3128",
-        HTTPS_PROXY: "http://104.43.230.151:3128",
+        PROXY_HOST: "13.95.173.197",
+        PROXY_PORT: "80",
+        HTTPS_PROXY: "http://13.95.173.197:80",
       },
     },
     {
@@ -145,9 +145,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5010,
-        PROXY_HOST: "149.28.125.186",
-        PROXY_PORT: "38080",
-        HTTPS_PROXY: "http://149.28.125.186:38080",
+        PROXY_HOST: "13.95.173.197",
+        PROXY_PORT: "80",
+        HTTPS_PROXY: "http://13.95.173.197:80",
       },
     },
   ],
