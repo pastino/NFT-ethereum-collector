@@ -57,7 +57,7 @@ const proxyTest = async () => {
         host: PROXY_LIST_2?.[i]?.host,
         port: PROXY_LIST_2?.[i]?.pory,
       },
-      timeout: 4000,
+      timeout: 8000,
       headers: {
         "X-API-KEY": process.env.OPENSEA_API_KEY as string,
       },
@@ -79,7 +79,6 @@ const proxyTest = async () => {
       console.log("에라이~!");
     }
   }
-
   console.log("successProxyList", successProxyList);
 };
 
