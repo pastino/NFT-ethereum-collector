@@ -1,10 +1,11 @@
 import { KakaoAccessToken } from "../entities/KakaoAccessToken";
 import axios from "axios";
 import { getRepository } from "typeorm";
-import { TextTypeKakaoTemplate } from "./types";
+import { FeedTypeKakaoTemplate, TextTypeKakaoTemplate } from "./types";
 import { Collection } from "../entities/Collection";
 import moment from "moment";
 import { isAxiosError } from "../commons/utils";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export class Message {
   constructor() {}
@@ -70,6 +71,8 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
       });
 
       const data = response?.data;
@@ -118,6 +121,8 @@ export class SendMessage {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
       });
 
       const resultCode = response?.data?.result_code;

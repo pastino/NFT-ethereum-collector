@@ -14,6 +14,7 @@ export const headerConfig: any = {
     host: process.env.PROXY_HOST,
     port: process.env.PROXY_PORT,
   },
+
   // httpsAgent: agent,
   // httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
   headers: {
@@ -107,12 +108,11 @@ export class OpenSea {
     offset: number;
   }) => {
     try {
-      console.log(1);
       const response = await axios.get(
         `https://api.opensea.io/api/v1/collections?asset_owner=${assetOwner}&offset=${offset}&limit=300`,
         headerConfig
       );
-
+      console.log("response", response);
       return response as {
         status: number;
         data: {}[];
