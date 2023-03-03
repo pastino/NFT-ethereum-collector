@@ -53,8 +53,9 @@ const deleteNotCompleteCollection = async () => {
 const proxyTest = async () => {
   const successProxyList: any = [];
   for (let i = 0; i < PROXY_LIST_2.length; i++) {
-    var agent = new HttpsProxyAgent("http://43.133.45.244:18560");
+    var agent = new HttpsProxyAgent("http://43.157.119.236:19739");
     const headerConfig: any = {
+      proxy: false,
       httpsAgent: agent,
       headers: {
         "X-API-KEY": process.env.OPENSEA_API_KEY as string,
@@ -85,7 +86,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      // proxyTest();
+      proxyTest();
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
