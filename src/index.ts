@@ -85,7 +85,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      proxyTest();
+      // proxyTest();
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
