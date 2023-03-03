@@ -12,6 +12,7 @@ import { Collection } from "./entities/Collection";
 import { PROXY_LIST, PROXY_LIST_2 } from "./commons/proxyList";
 import axios from "axios";
 import { sleep } from "./commons/utils";
+import { HttpsProxyAgent } from "https-proxy-agent";
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
 export const HTTPS_PROXY = IS_PRODUCTION
   ? process.env.HTTPS_PROXY
@@ -52,17 +53,13 @@ const deleteNotCompleteCollection = async () => {
 const proxyTest = async () => {
   const successProxyList: any = [];
   for (let i = 0; i < PROXY_LIST_2.length; i++) {
+    var agent = new HttpsProxyAgent("http://43.133.45.244:18560");
     const headerConfig: any = {
-      proxy: {
-        host: PROXY_LIST_2?.[i]?.host,
-        port: PROXY_LIST_2?.[i]?.pory,
-      },
-      timeout: 8000,
+      httpsAgent: agent,
       headers: {
         "X-API-KEY": process.env.OPENSEA_API_KEY as string,
       },
     };
-
     try {
       const result = await axios.get(
         `https://api.opensea.io/api/v1/collections?asset_owner=0x7ef61cacd0c785eacdfe17649d1c5bcba676a858&offset=0&limit=300`,
@@ -75,6 +72,7 @@ const proxyTest = async () => {
       console.log("성공~!", PROXY_LIST_2?.[i]?.host, PROXY_LIST_2?.[i]?.pory);
       await sleep(1.5);
     } catch (e: any) {
+      console.log("e", e.message);
       await sleep(1.5);
       console.log("에라이~!");
     }
@@ -87,7 +85,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      // proxyTest();
+      proxyTest();
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
