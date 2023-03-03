@@ -1,4 +1,5 @@
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import { getRepository } from "typeorm";
 import { makeAxiosErrorText } from "../commons/error";
 import { ERROR_STATUS_CODE } from "../commons/error";
@@ -9,14 +10,13 @@ import { CollectionEvent } from "../entities/CollectionEvent";
 import { SendMessage } from "./kakaoMessage";
 
 // TODO return 데이터 OpenSea 리턴데이터 확인 후 Type 지정
+
 export const headerConfig: any = {
   proxy: {
     host: process.env.PROXY_HOST,
     port: process.env.PROXY_PORT,
   },
-
-  // httpsAgent: agent,
-  // httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+  httpsAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
   headers: {
     "X-API-KEY": process.env.OPENSEA_API_KEY as string,
     // "user-agent":
