@@ -71,7 +71,8 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
-        httpsAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
       });
 
       const data = response?.data;
@@ -120,7 +121,8 @@ export class SendMessage {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        httpsAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+        proxy: false,
+        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
       });
 
       const resultCode = response?.data?.result_code;
