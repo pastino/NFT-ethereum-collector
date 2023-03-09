@@ -101,9 +101,9 @@ export class NFT {
 
       if (
         e.message !==
-          "Client network socket disconnected before secure TLS connection was established" &&
-        e.message !== "socket hang up" &&
-        e.message !== "timeout of 8000ms exceeded"
+          "Error: Client network socket disconnected before secure TLS connection was established" &&
+        e.message !== "Error: socket hang up" &&
+        e.message !== "Error: timeout of 8000ms exceeded"
       ) {
         await sleep(60 * 10);
       }
