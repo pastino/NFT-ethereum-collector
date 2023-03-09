@@ -6,6 +6,7 @@ import { NFT as NFTEntity } from "../entities/NFT";
 import { SendMessage } from "../modules/kakaoMessage";
 import { CreateEntityData } from "../modules/manufactureData";
 import { OpenSea } from "../modules/requestAPI";
+
 const sendMessage = new SendMessage();
 export class NFT {
   private collectionData: Collection;
@@ -59,9 +60,13 @@ export class NFT {
           return { isSuccess: true };
         }
 
-        const {
-          data: { next, assets },
-        } = await this.openSeaAPI.getNFTList(this.collectionData, this.cursor);
+        const data: any = await this.openSeaAPI.getNFTList(
+          this.collectionData,
+          this.cursor
+        );
+
+        const next = data?.next;
+        const assets = data?.assets;
 
         this.cursor = next;
 
