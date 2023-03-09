@@ -55,7 +55,7 @@ export class Event {
 
   private getEventList = async () => {
     try {
-      const data: any = await this.openSeaAPI.getEventList({
+      const { data }: any = await this.openSeaAPI.getEventList({
         collectionData: this.collectionData,
         cursor: this.cursor,
         occurredBefore: this.occurredBefore

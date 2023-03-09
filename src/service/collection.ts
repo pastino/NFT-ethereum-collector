@@ -43,7 +43,9 @@ export class Collection {
           message: "이미 생성된 컬랙션입니다.",
           collectionData: null,
         };
-      const data: any = await this.openSeaAPI.getCollection(this.targetData);
+      const { data }: any = await this.openSeaAPI.getCollection(
+        this.targetData
+      );
       const collection = data?.collection;
       const address = data?.address;
 
