@@ -61,6 +61,7 @@ const proxyTest = async () => {
         "X-API-KEY": process.env.OPENSEA_API_KEY as string,
       },
     };
+
     try {
       const result = await axios.get(
         `https://api.opensea.io/api/v1/collections?asset_owner=0x7ef61cacd0c785eacdfe17649d1c5bcba676a858&offset=0&limit=300`,
