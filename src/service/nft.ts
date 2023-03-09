@@ -95,7 +95,10 @@ export class NFT {
         text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 NFT 시점부터 다시 수집을 시작합니다.`,
         link: { mobile_web_url: "", web_url: "" },
       });
-      console.log(e.message);
+      console.log("nft 수집 에러", e);
+      console.log("nft 수집 에러", e.data);
+      console.log("nft 수집 에러", e.message);
+
       if (
         e.message !==
           "Client network socket disconnected before secure TLS connection was established" &&
