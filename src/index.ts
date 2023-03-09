@@ -15,9 +15,6 @@ import { sleep } from "./commons/utils";
 import { HttpsProxyAgent } from "https-proxy-agent";
 
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
-// export const HTTPS_PROXY = IS_PRODUCTION
-//   ? process.env.HTTPS_PROXY
-//   : `http://${PROXY_LIST[0].port}:${PROXY_LIST[0].protocol}`;
 
 const app = express();
 const PORT = IS_PRODUCTION ? process.env.PORT : 4002;
@@ -90,7 +87,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      proxyTest();
+      // proxyTest();
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
