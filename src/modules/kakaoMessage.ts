@@ -71,8 +71,7 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
-        proxy: false,
-        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+        httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
       });
 
       const data = response?.data;
@@ -121,8 +120,7 @@ export class SendMessage {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        proxy: false,
-        httpAgent: new HttpsProxyAgent(process.env.HTTPS_PROXY as string),
+        httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
       });
 
       const resultCode = response?.data?.result_code;
@@ -130,8 +128,8 @@ export class SendMessage {
       if (resultCode === 0) {
         console.log("카카오 메세지 전송");
       }
-    } catch (e: unknown) {
-      console.log("e", e);
+    } catch (e: any) {
+      console.log("e", e?.message);
       if (isAxiosError(e)) {
         if (e?.response?.data?.code === -401) {
           console.log("토큰 만료 유효성 검사 수정");

@@ -9,17 +9,18 @@ import kakaoAuthorization from "./routes/kakaoAuthorization";
 import deleteCollectionData from "./routes/deleteCollectionData";
 import createWalletAndCollection from "./routes/createWalletAndCollection";
 import { Collection } from "./entities/Collection";
-import { PROXY_LIST, PROXY_LIST_2 } from "./commons/proxyList";
 import axios from "axios";
+import { PROXY_LIST_2 } from "./commons/proxyList";
 import { sleep } from "./commons/utils";
 import { HttpsProxyAgent } from "https-proxy-agent";
+
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
-export const HTTPS_PROXY = IS_PRODUCTION
-  ? process.env.HTTPS_PROXY
-  : `http://${PROXY_LIST[0].port}:${PROXY_LIST[0].protocol}`;
+// export const HTTPS_PROXY = IS_PRODUCTION
+//   ? process.env.HTTPS_PROXY
+//   : `http://${PROXY_LIST[0].port}:${PROXY_LIST[0].protocol}`;
 
 const app = express();
-const PORT = IS_PRODUCTION ? process.env.PORT : 4000;
+const PORT = IS_PRODUCTION ? process.env.PORT : 4002;
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -52,11 +53,10 @@ const deleteNotCompleteCollection = async () => {
 
 const proxyTest = async () => {
   const successProxyList: any = [];
+
   for (let i = 0; i < PROXY_LIST_2.length; i++) {
-    var agent = new HttpsProxyAgent("http://43.157.119.236:19739");
     const headerConfig: any = {
-      proxy: false,
-      httpsAgent: agent,
+      httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
       headers: {
         "X-API-KEY": process.env.OPENSEA_API_KEY as string,
       },
@@ -66,6 +66,10 @@ const proxyTest = async () => {
         `https://api.opensea.io/api/v1/collections?asset_owner=0x7ef61cacd0c785eacdfe17649d1c5bcba676a858&offset=0&limit=300`,
         headerConfig
       );
+
+      delete result.data;
+      console.log("result", result?.config?.httpsAgent);
+
       if (typeof result?.data === "string") {
         throw new Error("에러");
       }
@@ -86,7 +90,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      proxyTest();
+      // proxyTest();
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
