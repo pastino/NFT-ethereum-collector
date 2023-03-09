@@ -52,7 +52,6 @@ const proxyTest = async () => {
   const successProxyList: any = [];
 
   for (let i = 0; i < PROXY_LIST_2.length; i++) {
-    console.log(i);
     const headerConfig: any = {
       httpsAgent: new HttpsProxyAgent("http://43.133.45.244:19886" as string),
       httpAgent: new HttpsProxyAgent("http://43.133.45.244:19886" as string),
@@ -68,7 +67,6 @@ const proxyTest = async () => {
         headerConfig
       );
 
-      console.log(result);
       delete result.data;
       // console.log(result.config.httpsAgent);
       // console.log(result.config.httpAgent);
@@ -93,7 +91,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      proxyTest();
+      // proxyTest();
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
