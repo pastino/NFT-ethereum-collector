@@ -248,28 +248,7 @@ export class Event {
         this.page += 1;
       }
     } catch (e: any) {
-      if (
-        e.message !==
-          "Error: Client network socket disconnected before secure TLS connection was established" &&
-        e.message !== "Error: socket hang up" &&
-        e.message !== "Error: timeout of 8000ms exceeded" &&
-        e.message !== "Error: aborted" &&
-        e.message !== "Error: Request failed with status code 403"
-      ) {
-        await sendMessage.sendKakaoMessage({
-          object_type: "text",
-          text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 종료된 이벤트 시점부터 다시 수집을 시작합니다.`,
-          link: { mobile_web_url: "", web_url: "" },
-        });
-        await sleep(60 * 10);
-        await sendMessage.sendKakaoMessage({
-          object_type: "text",
-          text: `Event 재수집 시작`,
-          link: { mobile_web_url: "", web_url: "" },
-        });
-      }
-
-      await this.createEventList(uuid);
+      console.log(e);
 
       // const response = JSON.parse(JSON.stringify(e));
       // if (typeof response === "object") {

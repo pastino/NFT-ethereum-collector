@@ -28,10 +28,8 @@ export const createCollectionAndNFTAndEvent = async ({
       const collectionClass = new Collection({ targetData, openSeaAPI });
       const uuid = uuidv4();
 
-      const { collectionData, code } = await collectionClass.createCollection(
-        walletData,
-        uuid
-      );
+      const { collectionData, code }: any =
+        await collectionClass.createCollection(walletData, uuid);
 
       // 이미 생성된 컬랙션이라면 다음 컬랙션 생성으로 넘어감
       if (!collectionData || code === RETURN_CODE_ENUM["이미 생성된 컬랙션"])
