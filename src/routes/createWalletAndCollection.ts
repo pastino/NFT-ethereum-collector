@@ -38,7 +38,8 @@ const createWalletData = async (walletAddress: string) => {
     if (
       e.message !==
         "Client network socket disconnected before secure TLS connection was established" &&
-      e.message !== "socket hang up"
+      e.message !== "socket hang up" &&
+      e.message !== "timeout of 8000ms exceeded"
     ) {
       await sleep(60 * 10);
     }

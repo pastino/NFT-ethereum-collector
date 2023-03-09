@@ -99,10 +99,12 @@ export class NFT {
       if (
         e.message !==
           "Client network socket disconnected before secure TLS connection was established" &&
-        e.message !== "socket hang up"
+        e.message !== "socket hang up" &&
+        e.message !== "timeout of 8000ms exceeded"
       ) {
         await sleep(60 * 10);
       }
+      // timeout of 8000ms exceeded
       await sendMessage.sendKakaoMessage({
         object_type: "text",
         text: `NFT 재수집 시작`,
