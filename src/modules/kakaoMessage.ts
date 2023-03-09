@@ -72,6 +72,8 @@ export class SendMessage {
           refresh_token: tokenData.refreshToken,
         },
         httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+        httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+        proxy: false,
       });
 
       const data = response?.data;
@@ -121,6 +123,8 @@ export class SendMessage {
           Authorization: `Bearer ${accessToken}`,
         },
         httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+        httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+        proxy: false,
       });
 
       const resultCode = response?.data?.result_code;

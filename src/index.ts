@@ -54,6 +54,8 @@ const proxyTest = async () => {
   for (let i = 0; i < PROXY_LIST_2.length; i++) {
     const headerConfig: any = {
       httpsAgent: new HttpsProxyAgent("http://43.133.45.244:19886" as string),
+      httpAgent: new HttpsProxyAgent("http://43.133.45.244:19886" as string),
+      proxy: false,
       headers: {
         "X-API-KEY": process.env.OPENSEA_API_KEY as string,
       },
@@ -66,6 +68,8 @@ const proxyTest = async () => {
       );
 
       delete result.data;
+      // console.log(result.config.httpsAgent);
+      // console.log(result.config.httpAgent);
 
       if (typeof result?.data === "string") {
         throw new Error("에러");
