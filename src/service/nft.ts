@@ -98,7 +98,7 @@ export class NFT {
       });
       if (
         e.message !==
-          "Client network socket disconnected before secure TLS connection was established" ||
+          "Client network socket disconnected before secure TLS connection was established" &&
         e.message !== "socket hang up"
       ) {
         await sleep(60 * 10);
