@@ -1,9 +1,8 @@
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { getRepository } from "typeorm";
-import { makeAxiosErrorText } from "../commons/error";
-import { ERROR_STATUS_CODE } from "../commons/error";
-import { isAxiosError, sleep } from "../commons/utils";
+import { RETRY_REQUEST_ERROR_TEXT_LIST } from "../commons/error";
+import { sleep } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
 import { Collection } from "../entities/Collection";
 import { CollectionEvent } from "../entities/CollectionEvent";
@@ -56,7 +55,10 @@ export class OpenSea {
           headerConfig
         );
         await sleep(1);
-        const nftList = await this.getNFTList(response.data?.collection, "");
+        const nftList: any = await this.getNFTList(
+          response.data?.collection,
+          ""
+        );
         response.data.address =
           nftList.data.assets?.[0]?.asset_contract?.address;
       }
@@ -66,7 +68,18 @@ export class OpenSea {
         data: { collection: {}; address: string };
       };
     } catch (e: any) {
-      throw new Error(e);
+      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+        const sendMessage = new SendMessage();
+        await sendMessage.sendKakaoMessage({
+          object_type: "text",
+          text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 콜랙션 가져오기를 다시 실행합니다.`,
+          link: { mobile_web_url: "", web_url: "" },
+        });
+
+        await sleep(60 * 10);
+      }
+
+      await this.getCollection(contractAddress);
     }
   };
 
@@ -81,22 +94,36 @@ export class OpenSea {
         status: number;
         data: { collection: {}; address: string };
       };
-    } catch (e: unknown) {
-      if (isAxiosError(e)) {
-        throw new Error(
-          `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
-            e.response?.data
-          }\n\n*statusText*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].statusText
-          }\n\n*statusDescription*\n${
-            ERROR_STATUS_CODE[e.response?.status as number].description
-          }`
-        );
+    } catch (e: any) {
+      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+        const sendMessage = new SendMessage();
+        await sendMessage.sendKakaoMessage({
+          object_type: "text",
+          text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 콜랙션 가져오기를 다시 실행합니다.`,
+          link: { mobile_web_url: "", web_url: "" },
+        });
+
+        await sleep(60 * 10);
       }
+
+      await this.getCollectionBySlug(collectionSlug);
+
+      //   if (isAxiosError(e)) {
+      //     throw new Error(
+      //       `<Error>\n\n*status*\n${e.response?.status}\n\n*data*\n${
+      //         e.response?.data
+      //       }\n\n*statusText*\n${
+      //         ERROR_STATUS_CODE[e.response?.status as number].statusText
+      //       }\n\n*statusDescription*\n${
+      //         ERROR_STATUS_CODE[e.response?.status as number].description
+      //       }`
+      //     );
+      //   }
+      // }
+      // throw new Error(
+      //   "getCollection 함수를 실행하는 중 런타임 에러가 발생하였습니다."
+      // );
     }
-    throw new Error(
-      "getCollection 함수를 실행하는 중 런타임 에러가 발생하였습니다."
-    );
   };
 
   public getCollectionList = async ({
@@ -116,14 +143,7 @@ export class OpenSea {
         data: {}[];
       };
     } catch (e: any) {
-      if (
-        e.message !==
-          "Client network socket disconnected before secure TLS connection was established" &&
-        e.message !== "socket hang up" &&
-        e.message !== "timeout of 8000ms exceeded" &&
-        e.message !== "aborted" &&
-        e.message !== "Request failed with status code 403"
-      ) {
+      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
         const sendMessage = new SendMessage();
         await sendMessage.sendKakaoMessage({
           object_type: "text",
@@ -149,7 +169,18 @@ export class OpenSea {
         data: { assets: any[]; next: string };
       };
     } catch (e: any) {
-      throw new Error(e);
+      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+        const sendMessage = new SendMessage();
+        await sendMessage.sendKakaoMessage({
+          object_type: "text",
+          text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 NFT 가져오기를 다시 실행합니다.`,
+          link: { mobile_web_url: "", web_url: "" },
+        });
+
+        await sleep(60 * 10);
+      }
+
+      await this.getNFTList(collectionData, cursor);
     }
   };
 
@@ -164,12 +195,19 @@ export class OpenSea {
         status: number;
         data: any;
       };
-    } catch (e) {
-      if (isAxiosError(e)) {
-        throw new Error(makeAxiosErrorText(e));
+    } catch (e: any) {
+      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+        const sendMessage = new SendMessage();
+        await sendMessage.sendKakaoMessage({
+          object_type: "text",
+          text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 NFT 가져오기를 다시 실행합니다.`,
+          link: { mobile_web_url: "", web_url: "" },
+        });
+
+        await sleep(60 * 10);
       }
+      await this.getNFT(collectionData, tokenId);
     }
-    throw new Error("getNFT 함수를 실행하는 중 런타임 에러가 발생하였습니다.");
   };
 
   private makeEventErrorRecord = async (collectionId: number) => {
@@ -214,7 +252,19 @@ export class OpenSea {
         data: { asset_events: any[]; next: string };
       };
     } catch (e: any) {
-      throw new Error(e);
+      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+        const sendMessage = new SendMessage();
+        await sendMessage.sendKakaoMessage({
+          object_type: "text",
+          text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 EVENT 가져오기를 다시 실행합니다.`,
+          link: { mobile_web_url: "", web_url: "" },
+        });
+
+        await sleep(60 * 10);
+      }
+
+      await this.getEventList({ collectionData, cursor, occurredBefore });
+
       // await this.makeEventErrorRecord(collectionData.id);
       // if (isAxiosError(e)) {
       //   if (e.code === "ECONNRESET") {

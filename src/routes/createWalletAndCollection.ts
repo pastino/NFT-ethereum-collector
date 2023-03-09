@@ -30,22 +30,7 @@ const createWalletData = async (walletAddress: string) => {
       profileImgUrl: profileImage,
     });
   } catch (e: any) {
-    if (
-      e.message !==
-        "Error: Client network socket disconnected before secure TLS connection was established" &&
-      e.message !== "Error: socket hang up" &&
-      e.message !== "Error: timeout of 8000ms exceeded" &&
-      e.message !== "Error: aborted" &&
-      e.message !== "Error: Request failed with status code 403"
-    ) {
-      await sendMessage.sendKakaoMessage({
-        object_type: "text",
-        text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 지갑 데이터를 다시 저장합니다.`,
-        link: { mobile_web_url: "", web_url: "" },
-      });
-      await sleep(60 * 10);
-    }
-    await createWalletData(walletAddress);
+    console.log(e);
   }
 };
 

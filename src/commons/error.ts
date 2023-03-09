@@ -20,6 +20,13 @@ export const makeAxiosErrorJson = (e: AxiosError) => {
     message: makeAxiosErrorText(e),
   };
 };
+export const RETRY_REQUEST_ERROR_TEXT_LIST = [
+  "Client network socket disconnected before secure TLS connection was established",
+  "socket hang up",
+  "timeout of 8000ms exceeded",
+  "aborted",
+  "Request failed with status code 403",
+];
 
 export const ERROR_STATUS_CODE: {
   [code: number]: {

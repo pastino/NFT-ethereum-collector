@@ -43,10 +43,12 @@ export class Collection {
           message: "이미 생성된 컬랙션입니다.",
           collectionData: null,
         };
-      const {
-        data: { collection, address },
-      } = await this.openSeaAPI.getCollection(this.targetData);
+      const data: any = await this.openSeaAPI.getCollection(this.targetData);
+      const collection = data?.collection;
+      const address = data?.address;
+
       // 컬랙션 데이터 객체 생성
+
       const createEntityData = new CreateEntityData({
         snakeObject: {
           ...collection,
