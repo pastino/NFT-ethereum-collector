@@ -68,7 +68,6 @@ const proxyTest = async () => {
       );
 
       delete result.data;
-      console.log("result", result?.config?.httpsAgent);
 
       if (typeof result?.data === "string") {
         throw new Error("에러");
