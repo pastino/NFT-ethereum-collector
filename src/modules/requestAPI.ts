@@ -118,11 +118,11 @@ export class OpenSea {
     } catch (e: any) {
       if (
         e.message !==
-          "Error: Client network socket disconnected before secure TLS connection was established" &&
-        e.message !== "Error: socket hang up" &&
-        e.message !== "Error: timeout of 8000ms exceeded" &&
-        e.message !== "Error: aborted" &&
-        e.message !== "Error: Request failed with status code 403"
+          "Client network socket disconnected before secure TLS connection was established" &&
+        e.message !== "socket hang up" &&
+        e.message !== "timeout of 8000ms exceeded" &&
+        e.message !== "aborted" &&
+        e.message !== "Request failed with status code 403"
       ) {
         const sendMessage = new SendMessage();
         await sendMessage.sendKakaoMessage({
