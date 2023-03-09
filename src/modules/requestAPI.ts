@@ -38,7 +38,7 @@ export class OpenSea {
     }
   };
 
-  public getCollection = async (contractAddress: string) => {
+  public getCollection: any = async (contractAddress: string) => {
     try {
       const isAddress = contractAddress.substring(0, 1) === "0x";
 
@@ -79,11 +79,11 @@ export class OpenSea {
         await sleep(60 * 10);
       }
 
-      await this.getCollection(contractAddress);
+      return this.getCollection(contractAddress);
     }
   };
 
-  public getCollectionBySlug = async (collectionSlug: string) => {
+  public getCollectionBySlug: any = async (collectionSlug: string) => {
     try {
       const response = await axios.get(
         `https://api.opensea.io/api/v1/collection/${collectionSlug}`,
@@ -106,7 +106,7 @@ export class OpenSea {
         await sleep(60 * 10);
       }
 
-      await this.getCollectionBySlug(collectionSlug);
+      return this.getCollectionBySlug(collectionSlug);
 
       //   if (isAxiosError(e)) {
       //     throw new Error(
@@ -126,7 +126,7 @@ export class OpenSea {
     }
   };
 
-  public getCollectionList = async ({
+  public getCollectionList: any = async ({
     assetOwner,
     offset,
   }: {
@@ -154,11 +154,11 @@ export class OpenSea {
         await sleep(60 * 10);
       }
 
-      await this.getCollectionList({ assetOwner, offset });
+      return this.getCollectionList({ assetOwner, offset });
     }
   };
 
-  public getNFTList = async (collectionData: any, cursor: string) => {
+  public getNFTList: any = async (collectionData: any, cursor: string) => {
     try {
       const response = await axios.get(
         `https://api.opensea.io/api/v1/assets?collection_slug=${collectionData.slug}&cursor=${cursor}`,
@@ -181,11 +181,11 @@ export class OpenSea {
         await sleep(60 * 10);
       }
 
-      await this.getNFTList(collectionData, cursor);
+      return this.getNFTList(collectionData, cursor);
     }
   };
 
-  public getNFT = async (collectionData: any, tokenId: string) => {
+  public getNFT: any = async (collectionData: any, tokenId: string) => {
     try {
       const response = await axios.get(
         `https://api.opensea.io/api/v1/asset/${collectionData.address}/${tokenId}`,
@@ -207,7 +207,7 @@ export class OpenSea {
 
         await sleep(60 * 10);
       }
-      await this.getNFT(collectionData, tokenId);
+      return this.getNFT(collectionData, tokenId);
     }
   };
 
@@ -229,7 +229,7 @@ export class OpenSea {
     }
   };
 
-  public getEventList = async ({
+  public getEventList: any = async ({
     collectionData,
     cursor,
     occurredBefore,
@@ -264,7 +264,7 @@ export class OpenSea {
         await sleep(60 * 10);
       }
 
-      await this.getEventList({ collectionData, cursor, occurredBefore });
+      return this.getEventList({ collectionData, cursor, occurredBefore });
 
       // await this.makeEventErrorRecord(collectionData.id);
       // if (isAxiosError(e)) {
