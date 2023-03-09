@@ -55,12 +55,17 @@ const createWalletAndCollection = async (req: Request, res: Response) => {
 
       if (!walletData) return;
 
+      console.log("walletData", walletData);
       while (true) {
         // 컬렉션 리스트 가져오기
+
+        console.log("컬렉션 리스트 가져오기");
         const res = await openSea.getCollectionList({
           assetOwner: walletAddress,
           offset,
         });
+
+        console.log(res);
 
         if (!res?.data) return;
 
