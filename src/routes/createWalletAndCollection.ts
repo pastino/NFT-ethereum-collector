@@ -41,6 +41,7 @@ const createWalletData = async (walletAddress: string) => {
 };
 
 const createWalletAndCollection = async (req: Request, res: Response) => {
+  console.log(process.env.PROXY_URL);
   try {
     const {
       body: { walletList },
