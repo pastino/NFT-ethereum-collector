@@ -80,7 +80,13 @@ export class Collection {
         text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 컬랙션을 다시 저장합니다.`,
         link: { mobile_web_url: "", web_url: "" },
       });
-      await sleep(60 * 10);
+      if (
+        e.message !==
+          "Client network socket disconnected before secure TLS connection was established" ||
+        e.message !== "socket hang up"
+      ) {
+        await sleep(60 * 10);
+      }
       await this.createCollection(walletData, uuid);
 
       // 실행안되는 Return

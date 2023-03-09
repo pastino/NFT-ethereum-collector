@@ -122,7 +122,15 @@ export class OpenSea {
         text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 콜랙션 리스트 가져오기를 다시 실행합니다.`,
         link: { mobile_web_url: "", web_url: "" },
       });
-      await sleep(60 * 10);
+
+      if (
+        e.message !==
+          "Client network socket disconnected before secure TLS connection was established" ||
+        e.message !== "socket hang up"
+      ) {
+        await sleep(60 * 10);
+      }
+
       await this.getCollectionList({ assetOwner, offset });
     }
   };
