@@ -1,7 +1,7 @@
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { getRepository } from "typeorm";
-import { RETRY_REQUEST_ERROR_TEXT_LIST } from "../commons/error";
+import { retryRequestValidation } from "../commons/error";
 import { sleep } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
 import { Collection } from "../entities/Collection";
@@ -68,7 +68,7 @@ export class OpenSea {
         data: { collection: {}; address: string };
       };
     } catch (e: any) {
-      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+      if (!retryRequestValidation(e.message)) {
         const sendMessage = new SendMessage();
         await sendMessage.sendKakaoMessage({
           object_type: "text",
@@ -95,7 +95,7 @@ export class OpenSea {
         data: { collection: {}; address: string };
       };
     } catch (e: any) {
-      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+      if (!retryRequestValidation(e.message)) {
         const sendMessage = new SendMessage();
         await sendMessage.sendKakaoMessage({
           object_type: "text",
@@ -143,7 +143,7 @@ export class OpenSea {
         data: {}[];
       };
     } catch (e: any) {
-      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+      if (!retryRequestValidation(e.message)) {
         const sendMessage = new SendMessage();
         await sendMessage.sendKakaoMessage({
           object_type: "text",
@@ -170,7 +170,7 @@ export class OpenSea {
         data: { assets: any[]; next: string };
       };
     } catch (e: any) {
-      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+      if (!retryRequestValidation(e.message)) {
         const sendMessage = new SendMessage();
         await sendMessage.sendKakaoMessage({
           object_type: "text",
@@ -197,7 +197,7 @@ export class OpenSea {
         data: any;
       };
     } catch (e: any) {
-      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+      if (!retryRequestValidation(e.message)) {
         const sendMessage = new SendMessage();
         await sendMessage.sendKakaoMessage({
           object_type: "text",
@@ -253,7 +253,7 @@ export class OpenSea {
         data: { asset_events: any[]; next: string };
       };
     } catch (e: any) {
-      if (!RETRY_REQUEST_ERROR_TEXT_LIST.includes(e.message)) {
+      if (!retryRequestValidation(e.message)) {
         const sendMessage = new SendMessage();
         await sendMessage.sendKakaoMessage({
           object_type: "text",
