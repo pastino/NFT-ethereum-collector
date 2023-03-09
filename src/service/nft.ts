@@ -60,7 +60,7 @@ export class NFT {
           return { isSuccess: true };
         }
 
-        const data: any = await this.openSeaAPI.getNFTList(
+        const { data }: any = await this.openSeaAPI.getNFTList(
           this.collectionData,
           this.cursor
         );
