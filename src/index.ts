@@ -56,7 +56,7 @@ const proxyTest = async () => {
 
   for (let i = 0; i < PROXY_LIST_2.length; i++) {
     const headerConfig: any = {
-      httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+      httpsAgent: new HttpsProxyAgent("http://43.133.45.244:19886" as string),
       headers: {
         "X-API-KEY": process.env.OPENSEA_API_KEY as string,
       },
@@ -89,7 +89,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      // proxyTest();
+      proxyTest();
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }

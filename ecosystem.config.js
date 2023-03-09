@@ -10,7 +10,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5001,
-        // HTTPS_PROXY: "http://43.157.119.236:19596",
+        PROXY_URL: "http://43.133.45.244:19886",
       },
     },
     {
@@ -23,7 +23,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5002,
-        // HTTPS_PROXY: "http://43.133.45.244:18560",
+        PROXY_URL: "http://43.157.121.234:19790",
       },
     },
     {
@@ -36,7 +36,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5003,
-        // HTTPS_PROXY: "http://43.157.119.236:19739",
+        PROXY_URL: "http://43.157.121.234:19791",
       },
     },
     {
@@ -49,7 +49,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5004,
-        // HTTPS_PROXY: "170.106.117.131:19035",
+        PROXY_URL: "http://43.157.119.236:19557",
       },
     },
     {
@@ -62,7 +62,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5005,
-        // HTTPS_PROXY: "http://43.157.119.236:19737",
+        PROXY_URL: "http://43.130.35.101:19612",
       },
     },
     {
@@ -75,7 +75,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5006,
-        // HTTPS_PROXY: "http://43.157.119.236:19740",
+        PROXY_URL: "http://170.106.117.131:19362",
       },
     },
     {
@@ -88,7 +88,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5007,
-        // HTTPS_PROXY: "http://43.130.35.101:19249",
+        PROXY_URL: "http://43.157.119.236:19556",
       },
     },
     {
@@ -101,7 +101,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5008,
-        // HTTPS_PROXY: "http://43.133.45.244:19827",
+        PROXY_URL: "http://43.130.35.101:19613",
       },
     },
     {
@@ -114,7 +114,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5009,
-        // HTTPS_PROXY: "http://43.157.119.236:19738",
+        PROXY_URL: "http://170.106.117.131:19363",
       },
     },
     {
@@ -127,7 +127,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5010,
-        // HTTPS_PROXY: "http://43.157.121.234:19959",
+        PROXY_URL: "http://43.133.45.244:19885",
       },
     },
     // {
@@ -140,7 +140,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5011,
-    //     // HTTPS_PROXY: "http://43.157.119.236:19596",
+    //     // PROXY_URL: "http://43.157.119.236:19596",
     //   },
     // },
     // {
@@ -153,7 +153,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5012,
-    //     // HTTPS_PROXY: "http://43.133.45.244:18560",
+    //     // PROXY_URL: "http://43.133.45.244:18560",
     //   },
     // },
     // {
@@ -166,7 +166,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5013,
-    //     // HTTPS_PROXY: "http://43.157.119.236:19739",
+    //     // PROXY_URL: "http://43.157.119.236:19739",
     //   },
     // },
     // {
@@ -179,7 +179,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5014,
-    //     // HTTPS_PROXY: "170.106.117.131:19035",
+    //     // PROXY_URL: "170.106.117.131:19035",
     //   },
     // },
     // {
@@ -192,7 +192,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5015,
-    //     // HTTPS_PROXY: "http://43.157.119.236:19737",
+    //     // PROXY_URL: "http://43.157.119.236:19737",
     //   },
     // },
     // {
@@ -205,7 +205,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5016,
-    //     // HTTPS_PROXY: "http://43.157.119.236:19740",
+    //     // PROXY_URL: "http://43.157.119.236:19740",
     //   },
     // },
     // {
@@ -218,7 +218,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5017,
-    //     // HTTPS_PROXY: "http://43.130.35.101:19249",
+    //     // PROXY_URL: "http://43.130.35.101:19249",
     //   },
     // },
     // {
@@ -231,7 +231,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5018,
-    //     // HTTPS_PROXY: "http://43.133.45.244:19827",
+    //     // PROXY_URL: "http://43.133.45.244:19827",
     //   },
     // },
     // {
@@ -244,7 +244,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5019,
-    //     // HTTPS_PROXY: "http://43.157.119.236:19738",
+    //     // PROXY_URL: "http://43.157.119.236:19738",
     //   },
     // },
     // {
@@ -257,7 +257,7 @@ module.exports = {
     //   env: {
     //     NODE_ENV: "production",
     //     PORT: 5020,
-    //     // HTTPS_PROXY: "http://43.157.121.234:19959",
+    //     // PROXY_URL: "http://43.157.121.234:19959",
     //   },
     // },
   ],
