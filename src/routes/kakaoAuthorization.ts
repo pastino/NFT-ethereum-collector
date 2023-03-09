@@ -26,6 +26,8 @@ const kakaoAuthorization = async (req: Request, res: Response) => {
         "Content-Type": "application/json",
       },
       httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+      httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+      proxy: false,
     });
 
     const createEntityData = new CreateEntityData({

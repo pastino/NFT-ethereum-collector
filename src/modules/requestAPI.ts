@@ -13,6 +13,8 @@ import { SendMessage } from "./kakaoMessage";
 
 export const headerConfig: any = {
   httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+  httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+  proxy: false,
   headers: {
     "X-API-KEY": process.env.OPENSEA_API_KEY as string,
     // "user-agent":
