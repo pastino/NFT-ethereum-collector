@@ -10,7 +10,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5001,
-        PROXY_URL: "http://43.133.45.244:19886",
+        // PROXY_URL: "http://43.133.45.244:19886",
       },
     },
     {
@@ -23,7 +23,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5002,
-        PROXY_URL: "http://43.157.121.234:19790",
+        // PROXY_URL: "http://43.157.121.234:19790",
       },
     },
     {
@@ -36,7 +36,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5003,
-        PROXY_URL: "http://43.157.121.234:19791",
+        // PROXY_URL: "http://43.157.121.234:19791",
       },
     },
     {
@@ -49,7 +49,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5004,
-        PROXY_URL: "http://43.157.119.236:19557",
+        // PROXY_URL: "http://43.157.119.236:19557",
       },
     },
     {
@@ -62,7 +62,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5005,
-        PROXY_URL: "http://43.130.35.101:19612",
+        // PROXY_URL: "http://43.130.35.101:19612",
       },
     },
     {
@@ -75,7 +75,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5006,
-        PROXY_URL: "http://170.106.117.131:19362",
+        // PROXY_URL: "http://170.106.117.131:19362",
       },
     },
     {
@@ -88,7 +88,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5007,
-        PROXY_URL: "http://43.157.119.236:19556",
+        // PROXY_URL: "http://43.157.119.236:19556",
       },
     },
     {
@@ -101,7 +101,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5008,
-        PROXY_URL: "http://43.130.35.101:19613",
+        // PROXY_URL: "http://43.130.35.101:19613",
       },
     },
     {
@@ -114,7 +114,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5009,
-        PROXY_URL: "http://170.106.117.131:19363",
+        // PROXY_URL: "http://170.106.117.131:19363",
       },
     },
     {
@@ -127,7 +127,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 5010,
-        PROXY_URL: "http://43.133.45.244:19885",
+        // PROXY_URL: "http://43.133.45.244:19885",
       },
     },
     // {
