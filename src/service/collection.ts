@@ -24,15 +24,7 @@ export class Collection {
     this.openSeaAPI = openSeaAPI;
   }
 
-  createCollection = async (
-    walletData: Wallet,
-    uuid: string
-  ): Promise<{
-    isSuccess: boolean;
-    collectionData: CollectionEntity | null;
-    code: RETURN_CODE_ENUM_TYPE;
-    message: string;
-  }> => {
+  createCollection = async (walletData: Wallet, uuid: string) => {
     try {
       // 이미 수집된 컬랙션이 존재하면 해당 컬랙션 수집 생략
       const hasCollection = await this.alreadyCollected(walletData);
@@ -79,35 +71,7 @@ export class Collection {
         message: "",
       };
     } catch (e: any) {
-      if (
-        e.message !==
-          "Error: Client network socket disconnected before secure TLS connection was established" &&
-        e.message !== "Error: socket hang up" &&
-        e.message !== "Error: timeout of 8000ms exceeded" &&
-        e.message !== "Error: aborted" &&
-        e.message !== "Error: Request failed with status code 403"
-      ) {
-        await sendMessage.sendKakaoMessage({
-          object_type: "text",
-          text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 오픈시 서버에러(500번대)로 10분간 정지 후 컬랙션을 다시 저장합니다.`,
-          link: { mobile_web_url: "", web_url: "" },
-        });
-        await sleep(60 * 10);
-        await sendMessage.sendKakaoMessage({
-          object_type: "text",
-          text: `NFT 재수집 시작`,
-          link: { mobile_web_url: "", web_url: "" },
-        });
-      }
-      await this.createCollection(walletData, uuid);
-
-      // 실행안되는 Return
-      return {
-        isSuccess: false,
-        collectionData: null,
-        code: "0",
-        message: "",
-      };
+      console.log(e);
     }
   };
 
