@@ -55,15 +55,17 @@ export class Event {
 
   private getEventList = async () => {
     try {
-      const {
-        data: { next, asset_events },
-      } = await this.openSeaAPI.getEventList({
+      const data: any = await this.openSeaAPI.getEventList({
         collectionData: this.collectionData,
         cursor: this.cursor,
         occurredBefore: this.occurredBefore
           ? this.occurredBefore
           : addHours(new Date(), 1),
       });
+
+      const next = data?.next;
+      const asset_events = data?.asset_events;
+
       this.cursor = next;
       return asset_events;
     } catch (e: any) {
@@ -82,7 +84,7 @@ export class Event {
     if (event?.asset?.token_id && !nftData) {
       // NFT DATA 생성
       try {
-        const res = await this.openSeaAPI.getNFT(
+        const res: any = await this.openSeaAPI.getNFT(
           this.collectionData,
           event?.asset?.token_id
         );
