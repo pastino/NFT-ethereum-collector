@@ -74,6 +74,7 @@ export class SendMessage {
         httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
         httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
         proxy: false,
+        timeout: 8000,
       });
 
       const data = response?.data;
@@ -125,6 +126,7 @@ export class SendMessage {
         httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
         httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
         proxy: false,
+        timeout: 8000,
       });
 
       const resultCode = response?.data?.result_code;

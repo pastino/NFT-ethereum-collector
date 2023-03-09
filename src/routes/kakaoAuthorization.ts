@@ -28,6 +28,7 @@ const kakaoAuthorization = async (req: Request, res: Response) => {
       httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
       httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
       proxy: false,
+      timeout: 8000,
     });
 
     const createEntityData = new CreateEntityData({
