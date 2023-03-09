@@ -115,7 +115,6 @@ export class OpenSea {
         data: {}[];
       };
     } catch (e: any) {
-      console.log(e.message);
       const sendMessage = new SendMessage();
       await sendMessage.sendKakaoMessage({
         object_type: "text",
@@ -125,7 +124,7 @@ export class OpenSea {
 
       if (
         e.message !==
-          "Client network socket disconnected before secure TLS connection was established" ||
+          "Client network socket disconnected before secure TLS connection was established" &&
         e.message !== "socket hang up"
       ) {
         await sleep(60 * 10);
