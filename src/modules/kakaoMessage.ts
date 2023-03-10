@@ -71,10 +71,10 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
-        httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-        httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-        proxy: false,
-        timeout: 8000,
+        // httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+        // httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+        // proxy: false,
+        // timeout: 8000,
       });
 
       const data = response?.data;
@@ -123,10 +123,10 @@ export class SendMessage {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-        httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-        proxy: false,
-        timeout: 8000,
+        // httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+        // httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
+        // proxy: false,
+        // timeout: 8000,
       });
 
       const resultCode = response?.data?.result_code;
