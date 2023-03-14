@@ -13,11 +13,13 @@ jobs:
     runs-on: [self-hosted]
 
     steps:
-      - name: Use Node.js 16.x
-        run: ssh -o StrictHostKeyChecking=no -i nft-collector.pem ubuntu@3.34.187.86
+      - name: second server connect
+        run: |
+          ssh -o StrictHostKeyChecking=no -i nft-collector.pem ubuntu@3.34.187.86
 
-      - name: Use Node.js 16.x
-        run: mkdir test
+      - name: confirm
+        run: |
+          mkdir test
 
       - uses: actions/checkout@v2
         with:
