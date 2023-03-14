@@ -11,7 +11,7 @@ import createWalletAndCollection from "./routes/createWalletAndCollection";
 import { Collection } from "./entities/Collection";
 import axios from "axios";
 import { PROXY_LIST_2 } from "./commons/proxyList";
-import { sleep } from "./commons/utils";
+import { getOpenseaApiKey, sleep } from "./commons/utils";
 import { HttpsProxyAgent } from "https-proxy-agent";
 
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
@@ -57,7 +57,7 @@ const proxyTest = async () => {
       // httpAgent: new HttpsProxyAgent("http://43.133.45.244:19886" as string),
       // proxy: false,
       headers: {
-        "X-API-KEY": process.env.OPENSEA_API_KEY as string,
+        "X-API-KEY": getOpenseaApiKey(),
       },
     };
 
