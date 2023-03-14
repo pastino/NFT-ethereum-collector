@@ -12,7 +12,6 @@ import { Collection } from "./entities/Collection";
 import axios from "axios";
 import { PROXY_LIST_2 } from "./commons/proxyList";
 import { getOpenseaApiKey, sleep } from "./commons/utils";
-import { HttpsProxyAgent } from "https-proxy-agent";
 
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
@@ -92,6 +91,7 @@ createConnection(connectionOptions)
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
       // proxyTest();
+      console.log(getOpenseaApiKey());
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
       }
