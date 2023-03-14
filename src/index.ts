@@ -90,7 +90,6 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-
       console.log(getOpenseaApiKey());
       if (IS_PRODUCTION) {
         await deleteNotCompleteCollection();
