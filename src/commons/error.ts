@@ -32,6 +32,9 @@ export const RETRY_REQUEST_ERROR_TEXT_LIST = [
 ];
 
 export const retryRequestValidation = (message: string) => {
+  if (message === "Request failed with status code 429") {
+    console.log("Request failed with status code 429");
+  }
   if (
     RETRY_REQUEST_ERROR_TEXT_LIST.includes(message) ||
     message.includes("ssl3_get_record")
