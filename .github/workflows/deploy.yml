@@ -64,6 +64,7 @@ jobs:
           echo ALIGO_API_KEY=${{ secrets.ALIGO_API_KEY }} >> .env
           echo ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }} >> .env
           echo OPENSEA_API_KEY=${{ secrets.OPENSEA_API_KEY }} >> .env
+          echo OPENSEA_API_KEY_2=${{ secrets.OPENSEA_API_KEY_2 }} >> .env
           echo KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} >> .env
           echo PROXY_URL=${{ secrets.PROXY_URL }} >> .env
 
@@ -82,6 +83,7 @@ jobs:
           ALIGO_API_KEY: ${{ secrets.ALIGO_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
+          OPENSEA_API_KEY_2: ${{ secrets.OPENSEA_API_KEY_2 }}
           KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
           PROXY_URL: ${{ secrets.PROXY_URL }}
         run: |

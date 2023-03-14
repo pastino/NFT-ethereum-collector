@@ -2,7 +2,7 @@ import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { getRepository } from "typeorm";
 import { retryRequestValidation } from "../commons/error";
-import { sleep } from "../commons/utils";
+import { getOpenseaApiKey, sleep } from "../commons/utils";
 import { IncompleteEventError } from "../entities/ IncompleteEventError";
 import { Collection } from "../entities/Collection";
 import { CollectionEvent } from "../entities/CollectionEvent";
@@ -16,7 +16,7 @@ export const headerConfig: any = {
   // proxy: false,
   // timeout: 8000,
   headers: {
-    "X-API-KEY": process.env.OPENSEA_API_KEY as string,
+    "X-API-KEY": getOpenseaApiKey(),
     // "user-agent":
     //   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
   },
