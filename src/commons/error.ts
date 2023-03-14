@@ -27,6 +27,7 @@ export const RETRY_REQUEST_ERROR_TEXT_LIST = [
   "timeout of 8000ms exceeded",
   "aborted",
   "Request failed with status code 403",
+  "Request failed with status code 429",
   "self signed certificate",
 ];
 
