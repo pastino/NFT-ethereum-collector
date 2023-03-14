@@ -13,15 +13,6 @@ jobs:
     runs-on: [self-hosted]
 
     steps:
-      - name: second server connect
-        run: |
-          cd ~/
-          ssh -o StrictHostKeyChecking=no -i nft-collector.pem ubuntu@3.34.187.86
-
-      - name: git clone
-        run: |
-          git clone https://github.com/pastino/NFT-ethereum-collector.git
-
       - uses: actions/checkout@v2
         with:
           clean: false
