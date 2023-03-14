@@ -15,7 +15,8 @@ jobs:
     steps:
       - name: second server connect
         run: |
-          cd ~/taejun
+          cd home
+          cd taejun
           ssh -o StrictHostKeyChecking=no -i nft-collector.pem ubuntu@3.34.187.86
 
       - name: confirm
