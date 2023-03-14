@@ -15,8 +15,8 @@ jobs:
     steps:
       - name: second server connect
         run: |
-          mkdir test
-      # ssh -o StrictHostKeyChecking=no -i nft-collector.pem ubuntu@3.34.187.86
+          cd ~/
+          ssh -o StrictHostKeyChecking=no -i nft-collector.pem ubuntu@3.34.187.86
 
       # - name: confirm
       #   run: |
