@@ -100,14 +100,19 @@ const create = async (walletAddress: string) => {
   const walletData = await createWallet(walletAddress);
 
   let cursor;
-
+  let page = 1;
   while (true) {
     // 컬렉션 리스트 가져오기
     const {
       contracts,
+      totalCount,
       pageKey,
     }: { contracts: ContractForOwner[]; pageKey: any } | any =
       await getContractsForOwnerHandler(walletAddress, cursor);
+
+    console.log(
+      `${walletAddress} >> page - ${page} / ${Math.ceil(totalCount / 100)}`
+    );
 
     interface _ContractForOwner extends Omit<ContractForOwner, "media"> {
       media?: any;
@@ -167,7 +172,7 @@ const create = async (walletAddress: string) => {
       //   link: { mobile_web_url: "", web_url: "" },
       // });
     }
-
+    page += 1;
     cursor = pageKey;
 
     if (!pageKey) {
