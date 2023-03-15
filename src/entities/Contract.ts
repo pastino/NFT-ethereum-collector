@@ -31,7 +31,7 @@ export class Contract {
   @Column({ nullable: true })
   imageUrl: string;
 
-  @Column({ nullable: true, length: 1000 })
+  @Column({ nullable: true, length: 5000 })
   description: string;
 
   @Column({ nullable: true })
