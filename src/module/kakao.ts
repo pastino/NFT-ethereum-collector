@@ -1,11 +1,7 @@
-import { KakaoAccessToken } from "../entities/KakaoAccessToken";
 import axios from "axios";
 import { getRepository } from "typeorm";
-import { FeedTypeKakaoTemplate, TextTypeKakaoTemplate } from "./types";
-import { Collection } from "../entities/Collection";
 import moment from "moment";
-import { isAxiosError } from "../commons/utils";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { KakaoAccessToken } from "../entities/KakaoAccessToken";
 
 export class Message {
   constructor() {}
@@ -28,10 +24,6 @@ export class Message {
         "MM/DD HH:mm"
       )}\n\n<컬랙션 수집>\n\n이미 수집된 컬랙션이 존재합니다.\n해당 컬랙션은 수집 생략하였습니다.\n\n주소 - ${contractAddress}`
     );
-  };
-
-  public deleteColectedData = async (contractAddress: string) => {
-    await getRepository(Collection).delete({ address: contractAddress });
   };
 }
 
@@ -71,10 +63,6 @@ export class SendMessage {
           client_id: process.env.KAKAO_CLIENT_ID,
           refresh_token: tokenData.refreshToken,
         },
-        // httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-        // httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-        // proxy: false,
-        // timeout: 8000,
       });
 
       const data = response?.data;
@@ -123,10 +111,6 @@ export class SendMessage {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        // httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-        // httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-        // proxy: false,
-        // timeout: 8000,
       });
 
       const resultCode = response?.data?.result_code;
@@ -136,11 +120,60 @@ export class SendMessage {
       }
     } catch (e: any) {
       console.log("e", e?.message);
-      if (isAxiosError(e)) {
-        if (e?.response?.data?.code === -401) {
-          console.log("토큰 만료 유효성 검사 수정");
-        }
-      }
     }
   };
 }
+
+type TextObjectType = "text";
+export interface TextTypeKakaoTemplate {
+  object_type: TextObjectType;
+  text: string;
+  link: { web_url: string; mobile_web_url: string };
+  button_title?: string;
+}
+
+type FeedObjectType = "feed";
+export interface FeedTypeKakaoTemplate {
+  object_type: FeedObjectType;
+  content: {
+    title: string;
+    description: string;
+    image_url: string;
+    image_width: string;
+    image_height: string;
+    link: {
+      web_url: string;
+      mobile_web_url: string;
+      android_execution_params: string;
+      ios_execution_params: string;
+    };
+  };
+  item_content: {
+    profile_text: string;
+    profile_image_url: string;
+    title_image_url: string;
+    title_image_text: string;
+    title_image_category: string;
+    items: {
+      item: string;
+      item_op: string;
+    }[];
+  };
+  social: {
+    like_count: number;
+    comment_count: number;
+    shared_count: number;
+    view_count: number;
+    subscriber_count: number;
+  };
+  buttons: {
+    title: string;
+    link: {
+      web_url: string;
+      mobile_web_url: string;
+      android_execution_params: string;
+      ios_execution_params: string;
+    };
+  }[];
+}
+// 타입 참고 - https://developers.kakao.com/docs/latest/ko/message/rest-api#default-template-msg

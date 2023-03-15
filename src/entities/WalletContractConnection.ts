@@ -7,11 +7,11 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { Collection } from "./Collection";
+import { Contract } from "./Contract";
 import { Wallet } from "./Wallet";
 
 @Entity()
-export class WalletHasCollection {
+export class WalletContractConnection {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,11 +23,11 @@ export class WalletHasCollection {
   walletId: number;
 
   @Column({ type: "int" })
-  @ManyToOne(() => Collection, (collection) => collection.id, {
+  @ManyToOne(() => Contract, (contract) => contract.id, {
     onDelete: "CASCADE",
   })
-  @JoinColumn({ name: "collectionId", referencedColumnName: "id" })
-  collectionId: number;
+  @JoinColumn({ name: "contractId", referencedColumnName: "id" })
+  contractId: number;
 
   @CreateDateColumn()
   createAt: Date;

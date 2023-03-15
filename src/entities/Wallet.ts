@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
-import { WalletHasCollection } from "./WalletHasCollection";
+import { WalletContractConnection } from "./WalletContractConnection";
 
 @Entity()
 export class Wallet {
@@ -23,13 +23,13 @@ export class Wallet {
   address: string;
 
   @OneToMany(
-    () => WalletHasCollection,
-    (walletHasCollection) => walletHasCollection.walletId,
+    () => WalletContractConnection,
+    (walletContractConnection) => walletContractConnection.walletId,
     {
       onDelete: "CASCADE",
     }
   )
-  walletHasCollection: WalletHasCollection[];
+  walletContract: WalletContractConnection[];
 
   @CreateDateColumn()
   createAt: Date;
