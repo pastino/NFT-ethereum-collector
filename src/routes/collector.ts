@@ -7,12 +7,12 @@ import {
 } from "alchemy-sdk";
 import { getRepository } from "typeorm";
 import { Contract } from "../entities/Contract";
-import { Opensea } from "../module/openSea";
 import { Wallet } from "../entities/Wallet";
 import { WalletContractConnection } from "../entities/WalletContractConnection";
 import { NFT } from "../entities/NFT";
 import { sleep } from "../utils";
 import { SendMessage } from "../module/kakao";
+import { Opensea } from "../module/opensea";
 
 const config = {
   apiKey: process.env.ALCHEMY_API_KEY,
