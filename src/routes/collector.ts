@@ -84,13 +84,15 @@ const getContractsForOwnerHandler = async (
 ): Promise<GetContractsForOwnerResponse> => {
   const option: {} = cursor ? { pageKey: cursor } : {};
   try {
-    return alchemy.nft.getContractsForOwner(walletAddress, option);
+    const data = await alchemy.nft.getContractsForOwner(walletAddress, option);
+    return data;
   } catch (e: any) {
     await sendMessage.sendKakaoMessage({
       object_type: "text",
       text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 10분간 정지 후 콜랙션 가져오기를 다시 실행합니다. (에러 위치 - getContractsForOwnerHandler 함수)`,
       link: { mobile_web_url: "", web_url: "" },
     });
+    console.log(cursor);
     await sleep(60 * 10);
     return getContractsForOwnerHandler(walletAddress, cursor);
   }
@@ -113,6 +115,7 @@ const create = async (walletAddress: string) => {
     console.log(
       `${walletAddress} >> page - ${page} / ${Math.ceil(totalCount / 100)}`
     );
+    console.log(pageKey);
 
     interface _ContractForOwner extends Omit<ContractForOwner, "media"> {
       media?: any;
