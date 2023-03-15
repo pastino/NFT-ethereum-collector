@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import axios from "axios";
-import { CreateEntityData } from "../modules/manufactureData";
 import { KakaoAccessToken } from "../entities/KakaoAccessToken";
-import { isAxiosError } from "../commons/utils";
-import { SendMessage } from "../modules/kakaoMessage";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { CreateEntityData } from "../module/manufactureData";
+import { isAxiosError } from "../utils";
+import { SendMessage } from "../module/kakao";
 
 const kakaoAuthorization = async (req: Request, res: Response) => {
   try {
@@ -25,10 +24,6 @@ const kakaoAuthorization = async (req: Request, res: Response) => {
       headers: {
         "Content-Type": "application/json",
       },
-      // httpsAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-      // httpAgent: new HttpsProxyAgent(process.env.PROXY_URL as string),
-      // proxy: false,
-      // timeout: 8000,
     });
 
     const createEntityData = new CreateEntityData({
