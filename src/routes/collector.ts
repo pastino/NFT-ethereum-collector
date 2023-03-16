@@ -10,9 +10,10 @@ import { Contract } from "../entities/Contract";
 import { Wallet } from "../entities/Wallet";
 import { WalletContractConnection } from "../entities/WalletContractConnection";
 import { NFT } from "../entities/NFT";
-import { sleep } from "../utils";
+import { addHours, sleep } from "../utils";
 import { SendMessage } from "../module/kakao";
 import { Opensea } from "../module/opensea";
+import moment from "moment";
 
 const config = {
   apiKey: process.env.ALCHEMY_API_KEY,
@@ -103,85 +104,78 @@ const create = async (walletAddress: string) => {
 
   let cursor;
   let page = 1;
-  while (true) {
+  const contractList = [];
+
+  while (page !== 1 && !cursor) {
     // 컬렉션 리스트 가져오기
     const {
       contracts,
-      totalCount,
       pageKey,
     }: { contracts: ContractForOwner[]; pageKey: any } | any =
       await getContractsForOwnerHandler(walletAddress, cursor);
 
-    console.log(
-      `${walletAddress} >> page - ${page} / ${Math.ceil(totalCount / 100)}`
-    );
-    console.log(pageKey);
-
-    interface _ContractForOwner extends Omit<ContractForOwner, "media"> {
-      media?: any;
-      openSea?: any;
-      [key: string]: any;
-    }
-
-    for (let i = 0; i < contracts.length; i++) {
-      const contract: _ContractForOwner = contracts[i];
-
-      // 이미 존재하는 contract라면 생략
-      const existingContract = await getRepository(Contract).findOne({
-        where: {
-          address: contract.address,
-        },
-      });
-      if (existingContract) continue;
-
-      const newContract: _ContractForOwner = {
-        ...contract,
-        ...contract.openSea,
-        isCompletedInitialUpdate: false,
-        isCompletedUpdate: false,
-      };
-      delete contract.media;
-      delete contract.openSea;
-
-      const contractData = await getRepository(Contract).save(newContract);
-      const existingConnection = await getRepository(
-        WalletContractConnection
-      ).findOne({
-        where: {
-          walletId: walletData.id,
-          contractId: contractData?.id,
-        },
-      });
-      if (!existingConnection) {
-        await getRepository(WalletContractConnection).save({
-          walletId: walletData.id,
-          contractId: contractData?.id,
-        });
-      }
-
-      // await createNFT(contractData.address, contractData.id);
-
-      await getRepository(Contract).update(
-        { id: contractData.id },
-        { isCompletedInitialUpdate: true, isCompletedUpdate: true }
-      );
-      // await sendMessage.sendKakaoMessage({
-      //   object_type: "text",
-      //   text: `${moment(addHours(new Date(), 9)).format(
-      //     "MM/DD HH:mm"
-      //   )}\n\n<contract 생성 완료 - ${i + 1}/${contracts.length}>\n\n${
-      //     contractData.name
-      //   } contract 데이터 생성이 완료되었습니다`,
-      //   link: { mobile_web_url: "", web_url: "" },
-      // });
-    }
+    contractList.push(...contracts);
     page += 1;
     cursor = pageKey;
-
-    if (!pageKey) {
-      return true;
-    }
   }
+
+  interface _ContractForOwner extends Omit<ContractForOwner, "media"> {
+    media?: any;
+    openSea?: any;
+    [key: string]: any;
+  }
+
+  for (let i = 0; i < contractList.length; i++) {
+    const contract: _ContractForOwner = contractList[i];
+
+    // 이미 존재하는 contract라면 생략
+    const existingContract = await getRepository(Contract).findOne({
+      where: {
+        address: contract.address,
+      },
+    });
+    if (existingContract) continue;
+
+    const newContract: _ContractForOwner = {
+      ...contract,
+      ...contract.openSea,
+      isCompletedInitialUpdate: false,
+      isCompletedUpdate: false,
+    };
+    delete contract.media;
+    delete contract.openSea;
+
+    const contractData = await getRepository(Contract).save(newContract);
+    const existingConnection = await getRepository(
+      WalletContractConnection
+    ).findOne({
+      where: {
+        walletId: walletData.id,
+        contractId: contractData?.id,
+      },
+    });
+    if (!existingConnection) {
+      await getRepository(WalletContractConnection).save({
+        walletId: walletData.id,
+        contractId: contractData?.id,
+      });
+    }
+
+    // await createNFT(contractData.address, contractData.id);
+
+    await getRepository(Contract).update(
+      { id: contractData.id },
+      { isCompletedInitialUpdate: true, isCompletedUpdate: true }
+    );
+  }
+
+  await sendMessage.sendKakaoMessage({
+    object_type: "text",
+    text: `${moment(addHours(new Date(), 9)).format(
+      "MM/DD HH:mm"
+    )}\n\n<wallet data 생성 완료 - ${walletAddress}>의 contract 데이터 생성이 완료되었습니다`,
+    link: { mobile_web_url: "", web_url: "" },
+  });
 };
 
 const collector = async (req: Request, res: Response) => {
