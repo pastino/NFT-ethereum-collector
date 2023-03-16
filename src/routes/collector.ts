@@ -93,20 +93,18 @@ const getContractsForOwnerHandler = async (
       text: `${e.message}\n\n<필독>\n\n오류가 발생하였지만 10분간 정지 후 콜랙션 가져오기를 다시 실행합니다. (에러 위치 - getContractsForOwnerHandler 함수)`,
       link: { mobile_web_url: "", web_url: "" },
     });
-    console.log(cursor);
     await sleep(60 * 10);
     return getContractsForOwnerHandler(walletAddress, cursor);
   }
 };
 
-const create = async (walletAddress: string) => {
+const create = async (walletAddress: string, index: number) => {
   const walletData = await createWallet(walletAddress);
 
-  let cursor;
+  let cursor = null;
   let page = 1;
   const contractList = [];
-
-  while (page !== 1 && !cursor) {
+  while (cursor !== undefined) {
     // 컬렉션 리스트 가져오기
     const {
       contracts,
@@ -173,7 +171,7 @@ const create = async (walletAddress: string) => {
     object_type: "text",
     text: `${moment(addHours(new Date(), 9)).format(
       "MM/DD HH:mm"
-    )}\n\n<wallet data 생성 완료 - ${walletAddress}>의 contract 데이터 생성이 완료되었습니다`,
+    )}\n\n<wallet data 생성 완료> ${walletAddress}(${index}번째)의 contract 데이터 생성이 완료되었습니다`,
     link: { mobile_web_url: "", web_url: "" },
   });
 };
@@ -185,7 +183,7 @@ const collector = async (req: Request, res: Response) => {
     }: { body: { walletAddressList: string[] } } = req;
 
     for (let i = 0; i < walletAddressList.length; i++) {
-      await create(walletAddressList[i]);
+      await create(walletAddressList[i], i);
     }
     return res.status(200).json({ success: true });
   } catch (e: any) {
