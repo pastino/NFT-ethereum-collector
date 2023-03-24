@@ -1,19 +1,20 @@
 import { Request, Response } from "express";
 import {
   Alchemy,
-  ContractForOwner,
   GetContractsForOwnerResponse,
   Network,
+  SortingOrder,
+  GetTransfersForContractOptions,
 } from "alchemy-sdk";
 import { getRepository } from "typeorm";
 import { Contract } from "../entities/Contract";
-import { Wallet } from "../entities/Wallet";
-import { WalletContractConnection } from "../entities/WalletContractConnection";
-import { NFT } from "../entities/NFT";
-import { addHours, sleep } from "../utils";
-import { SendMessage } from "../module/kakao";
 import { Opensea } from "../module/opensea";
-import moment from "moment";
+import { Wallet } from "../entities/Wallet";
+import { NFT } from "../entities/NFT";
+import { sleep } from "../utils";
+import { SendMessage } from "../module/kakao";
+import { Transfer } from "../entities/Transfer";
+import { Transaction } from "../entities/Transaction";
 
 const config = {
   apiKey: process.env.ALCHEMY_API_KEY,
@@ -48,14 +49,17 @@ const createWallet = async (walletAddress: string) => {
   });
 };
 
-const createNFT = async (contractAddress: string, contractId: number) => {
+const createNFT = async (contractAddress: string, contract: Contract) => {
   // NFT 저장
   let cursor;
   let page = 1;
 
   while (true) {
-    const { nfts, pageKey } = await alchemy.nft.getNftsForContract(
-      contractAddress
+    const { nfts, pageKey }: any = await alchemy.nft.getNftsForContract(
+      contractAddress,
+      {
+        pageKey: cursor,
+      }
     );
 
     for (let i = 0; i < nfts.length; i++) {
@@ -67,9 +71,7 @@ const createNFT = async (contractAddress: string, contractId: number) => {
         ...nft,
         mediaGateway: nft?.media?.[0]?.gateway,
         mediaThumbnail: nft?.media?.[0]?.thumbnail,
-        mediaRaw: nft?.media?.[0]?.raw,
-        rawMetadataImage: nft?.rawMetadata?.image,
-        contractId,
+        contract,
       });
     }
 
@@ -85,8 +87,7 @@ const getContractsForOwnerHandler = async (
 ): Promise<GetContractsForOwnerResponse> => {
   const option: {} = cursor ? { pageKey: cursor } : {};
   try {
-    const data = await alchemy.nft.getContractsForOwner(walletAddress, option);
-    return data;
+    return alchemy.nft.getContractsForOwner(walletAddress, option);
   } catch (e: any) {
     await sendMessage.sendKakaoMessage({
       object_type: "text",
@@ -98,96 +99,136 @@ const getContractsForOwnerHandler = async (
   }
 };
 
-const create = async (walletAddress: string, index: number) => {
-  const walletData = await createWallet(walletAddress);
+const createContract = async (
+  contractAddress: string
+): Promise<Contract | null> => {
+  try {
+    const contract = await alchemy.nft.getContractMetadata(contractAddress);
 
-  let cursor = null;
-  let page = 1;
-  const contractList = [];
-  while (cursor !== undefined) {
-    // 컬렉션 리스트 가져오기
-    const {
-      contracts,
-      pageKey,
-    }: { contracts: ContractForOwner[]; pageKey: any } | any =
-      await getContractsForOwnerHandler(walletAddress, cursor);
-
-    contractList.push(...contracts);
-    page += 1;
-    cursor = pageKey;
-  }
-
-  interface _ContractForOwner extends Omit<ContractForOwner, "media"> {
-    media?: any;
-    openSea?: any;
-    [key: string]: any;
-  }
-
-  for (let i = 0; i < contractList.length; i++) {
-    const contract: _ContractForOwner = contractList[i];
-
-    // 이미 존재하는 contract라면 생략
     const existingContract = await getRepository(Contract).findOne({
       where: {
         address: contract.address,
       },
     });
-    if (existingContract) continue;
+    if (existingContract) return existingContract;
 
-    const newContract: _ContractForOwner = {
+    const newContract = {
       ...contract,
       ...contract.openSea,
       isCompletedInitialUpdate: false,
       isCompletedUpdate: false,
     };
-    delete contract.media;
     delete contract.openSea;
+    return getRepository(Contract).save(newContract);
+  } catch (e: any) {
+    throw new Error(e.message);
+  }
+};
 
-    const contractData = await getRepository(Contract).save(newContract);
-    const existingConnection = await getRepository(
-      WalletContractConnection
-    ).findOne({
+const hexToDecimal = (hexValue: string) => {
+  return parseInt(hexValue, 16);
+};
+
+const createTransaction = async (
+  contractAddress: string,
+  contract: Contract
+) => {
+  try {
+    const latestTransaction = await getRepository(Transfer).findOne({
       where: {
-        walletId: walletData.id,
-        contractId: contractData?.id,
+        contract,
       },
+      order: { createAt: "DESC" },
     });
-    if (!existingConnection) {
-      await getRepository(WalletContractConnection).save({
-        walletId: walletData.id,
-        contractId: contractData?.id,
-      });
+
+    let cursor;
+    let page = 1;
+
+    let transferOption: GetTransfersForContractOptions = {
+      order: SortingOrder.ASCENDING,
+      pageKey: cursor,
+    };
+
+    if (latestTransaction && page === 1) {
+      transferOption = {
+        fromBlock: latestTransaction.blockNumber,
+        order: SortingOrder.ASCENDING,
+        pageKey: cursor,
+      };
     }
 
-    // await createNFT(contractData.address, contractData.id);
+    while (true) {
+      const { nfts, pageKey } = await alchemy.nft.getTransfersForContract(
+        contractAddress,
+        transferOption
+      );
 
-    await getRepository(Contract).update(
-      { id: contractData.id },
-      { isCompletedInitialUpdate: true, isCompletedUpdate: true }
-    );
+      for (let i = 0; i < nfts?.length; i++) {
+        const transfer = nfts[i];
+
+        if (latestTransaction && page === 1) {
+          if (transfer.transactionHash === latestTransaction.transactionHash) {
+            continue;
+          }
+        }
+
+        const transaction = await alchemy.transact.getTransaction(
+          transfer.transactionHash
+        );
+
+        const nft = await getRepository(NFT).findOne({
+          where: {
+            contract,
+            tokenId: transfer?.tokenId,
+          },
+        });
+
+        if (!transaction || !transfer) return;
+
+        const transferData = await getRepository(Transfer).save({
+          ...transfer,
+          contract,
+          nft,
+        });
+
+        const transactionData = await getRepository(Transaction).save({
+          ...transaction,
+          transfer: transferData,
+          gasPrice: String(hexToDecimal(transaction.gasPrice?._hex || "0")),
+          gasLimit: String(hexToDecimal(transaction.gasLimit?._hex || "0")),
+          value: String(hexToDecimal(transaction.value?._hex || "0")),
+        });
+        await getRepository(Transfer).update(
+          {
+            id: transferData.id,
+          },
+          {
+            transaction: transactionData,
+          }
+        );
+      }
+
+      cursor = pageKey;
+      page += 1;
+    }
+  } catch (e) {
+    console.log(e);
   }
-
-  await sendMessage.sendKakaoMessage({
-    object_type: "text",
-    text: `${moment(addHours(new Date(), 9)).format(
-      "MM/DD HH:mm"
-    )}\n\n<wallet data 생성 완료> ${walletAddress}(${index}번째)의 contract 데이터 생성이 완료되었습니다`,
-    link: { mobile_web_url: "", web_url: "" },
-  });
 };
 
 const collector = async (req: Request, res: Response) => {
   try {
     const {
-      body: { walletAddressList },
-    }: { body: { walletAddressList: string[] } } = req;
+      body: { contractAddress },
+    }: { body: { contractAddress: string } } = req;
 
-    for (let i = 0; i < walletAddressList.length; i++) {
-      await create(walletAddressList[i], i);
-    }
+    const contract = await createContract(contractAddress);
+    if (!contract) return res.status(400).send({ success: false, message: "" });
+
+    await createNFT(contract.address, contract);
+    await createTransaction(contractAddress, contract);
     return res.status(200).json({ success: true });
   } catch (e: any) {
-    console.log(e.message);
     return res.status(400).send({ success: false, message: e.message });
   }
 };

@@ -7,8 +7,9 @@ import {
   OneToMany,
 } from "typeorm";
 import { NFT } from "./NFT";
+import { Transfer } from "./Transfer";
 
-@Entity()
+@Entity({ name: "contract" })
 export class Contract {
   @PrimaryGeneratedColumn()
   id: number;
@@ -31,7 +32,7 @@ export class Contract {
   @Column({ nullable: true })
   imageUrl: string;
 
-  @Column({ nullable: true, length: 5000 })
+  @Column({ nullable: true, length: 1000 })
   description: string;
 
   @Column({ nullable: true })
@@ -55,16 +56,19 @@ export class Contract {
   @Column({ nullable: true })
   deployedBlockNumber: number;
 
-  @OneToMany(() => NFT, (nft) => nft.contractId, {
-    onDelete: "CASCADE",
-  })
-  nft: NFT[];
-
   @Column({ default: false })
   isCompletedInitialUpdate: boolean;
 
   @Column({ default: true })
   isCompletedUpdate: boolean;
+
+  @OneToMany(() => NFT, (nft) => nft.contract, {
+    onDelete: "CASCADE",
+  })
+  nfts: NFT[];
+
+  @OneToMany(() => Transfer, (transfer) => transfer.contract)
+  transfers: Transfer[];
 
   @CreateDateColumn()
   createAt: Date;

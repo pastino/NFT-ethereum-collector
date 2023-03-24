@@ -10,7 +10,7 @@ import {
 import { Contract } from "./Contract";
 import { Wallet } from "./Wallet";
 
-@Entity()
+@Entity({ name: "walletContractConnection" })
 export class WalletContractConnection {
   @PrimaryGeneratedColumn()
   id: number;

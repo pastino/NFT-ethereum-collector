@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
-@Entity()
+@Entity({ name: "kakaoAccessToken" })
 export class KakaoAccessToken {
   @PrimaryGeneratedColumn()
   id: number;

@@ -6,21 +6,30 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany,
+  OneToOne,
 } from "typeorm";
 import { Contract } from "./Contract";
-import { Transfer } from "./Transfer";
+import { NFT } from "./NFT";
+import { Transaction } from "./Transaction";
 
-@Entity()
-export class NFT {
+@Entity({ name: "transfer" })
+export class Transfer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Contract, (contract) => contract.nfts, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => Contract, (contract) => contract.id)
   @JoinColumn({ name: "contractId", referencedColumnName: "id" })
   contract: Contract;
+
+  @ManyToOne(() => NFT, (nft) => nft.transfers)
+  @JoinColumn({ name: "nftId", referencedColumnName: "id" })
+  nft: NFT;
+
+  @OneToOne(() => Transaction, (transaction) => transaction.transfer, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "transactionId", referencedColumnName: "id" })
+  transaction: Transaction;
 
   @Column({ nullable: true })
   tokenId: string;
@@ -32,19 +41,16 @@ export class NFT {
   title: string;
 
   @Column({ nullable: true })
-  description: string;
+  from: string;
 
   @Column({ nullable: true })
-  mediaGateway: string;
+  to: string;
 
   @Column({ nullable: true })
-  mediaThumbnail: string;
+  transactionHash: string;
 
   @Column({ nullable: true })
-  rawMetadataImage: string;
-
-  @OneToMany(() => Transfer, (transfer) => transfer.nft)
-  transfers: Transfer[];
+  blockNumber: string;
 
   @CreateDateColumn()
   createAt: Date;

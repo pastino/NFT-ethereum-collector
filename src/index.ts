@@ -9,6 +9,7 @@ import collector from "./routes/collector";
 import { Contract } from "./entities/Contract";
 import kakaoAuthorization from "./routes/kakaoAuthorization";
 import axios from "axios";
+import { Configuration, OpenAIApi } from "openai";
 
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const PORT = IS_PRODUCTION ? process.env.PORT : 4002;

@@ -21,7 +21,7 @@
     "@alch/alchemy-web3": "^1.4.7",
     "@types/multer": "^1.4.6",
     "@types/multer-s3": "^2.7.9",
-    "alchemy-sdk": "^2.3.1",
+    "alchemy-sdk": "2.6.1",
     "aws-sdk": "^2.931.0",
     "axios": "^0.24.0",
     "bcryptjs": "^2.4.3",
