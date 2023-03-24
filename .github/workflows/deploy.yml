@@ -58,6 +58,7 @@ jobs:
           echo OPENSEA_API_KEY_2=${{ secrets.OPENSEA_API_KEY_2 }} >> .env
           echo KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} >> .env
           echo PROXY_URL=${{ secrets.PROXY_URL }} >> .env
+          echo OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} >> .env
 
       - name: Run new server (in background)
         env:
@@ -77,6 +78,8 @@ jobs:
           OPENSEA_API_KEY_2: ${{ secrets.OPENSEA_API_KEY_2 }}
           KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
           PROXY_URL: ${{ secrets.PROXY_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
         run: |
           cd ~/ethereum-collector
           npx pm2 install typescript
