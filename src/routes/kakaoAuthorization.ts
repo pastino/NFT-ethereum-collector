@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import axios from "axios";
-import { CreateEntityData } from "../modules/manufactureData";
 import { KakaoAccessToken } from "../entities/KakaoAccessToken";
-import { isAxiosError } from "../commons/utils";
-import { SendMessage } from "../modules/kakaoMessage";
+import { CreateEntityData } from "../module/manufactureData";
+import { isAxiosError } from "../utils";
+import { SendMessage } from "../module/kakao";
 
 const kakaoAuthorization = async (req: Request, res: Response) => {
   try {
