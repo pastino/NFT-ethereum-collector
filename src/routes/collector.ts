@@ -5,6 +5,7 @@ import {
   Network,
   SortingOrder,
   GetTransfersForContractOptions,
+  Block,
 } from "alchemy-sdk";
 import { getRepository } from "typeorm";
 import { Contract } from "../entities/Contract";
@@ -69,7 +70,6 @@ const createNFT = async (contractAddress: string, contract: Contract) => {
 
       await getRepository(NFT).save({
         ...nft,
-        mediaGateway: nft?.media?.[0]?.gateway,
         mediaThumbnail: nft?.media?.[0]?.thumbnail,
         contract,
       });
@@ -141,19 +141,18 @@ const createTransaction = async (
       order: { createAt: "DESC" },
     });
 
-    let cursor;
     let page = 1;
 
     let transferOption: GetTransfersForContractOptions = {
       order: SortingOrder.ASCENDING,
-      pageKey: cursor,
+      pageKey: undefined,
     };
 
     if (latestTransaction && page === 1) {
       transferOption = {
         fromBlock: latestTransaction.blockNumber,
         order: SortingOrder.ASCENDING,
-        pageKey: cursor,
+        pageKey: undefined,
       };
     }
 
@@ -183,21 +182,37 @@ const createTransaction = async (
           },
         });
 
-        if (!transaction || !transfer) return;
-
         const transferData = await getRepository(Transfer).save({
           ...transfer,
           contract,
           nft,
         });
 
+        let timeOption = {};
+
+        if (transaction?.blockHash) {
+          const blockData: Block = await alchemy.core.getBlock(
+            transaction?.blockHash
+          );
+
+          const timestamp = blockData.timestamp;
+          const eventTime = new Date(timestamp * 1000);
+
+          timeOption = {
+            timestamp,
+            eventTime,
+          };
+        }
+
         const transactionData = await getRepository(Transaction).save({
           ...transaction,
           transfer: transferData,
-          gasPrice: String(hexToDecimal(transaction.gasPrice?._hex || "0")),
-          gasLimit: String(hexToDecimal(transaction.gasLimit?._hex || "0")),
-          value: String(hexToDecimal(transaction.value?._hex || "0")),
+          gasPrice: String(hexToDecimal(transaction?.gasPrice?._hex || "0")),
+          gasLimit: String(hexToDecimal(transaction?.gasLimit?._hex || "0")),
+          value: String(hexToDecimal(transaction?.value?._hex || "0")),
+          ...timeOption,
         });
+
         await getRepository(Transfer).update(
           {
             id: transferData.id,
@@ -208,7 +223,7 @@ const createTransaction = async (
         );
       }
 
-      cursor = pageKey;
+      transferOption.pageKey = pageKey;
       page += 1;
     }
   } catch (e) {

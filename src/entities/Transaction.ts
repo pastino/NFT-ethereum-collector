@@ -25,7 +25,10 @@ export class Transaction {
   transfer: Transfer;
 
   @Column({ nullable: true })
-  timestamp: Date;
+  timestamp: number;
+
+  @Column({ nullable: true })
+  eventTime: Date;
 
   @Column({ nullable: true })
   blockHash: string;

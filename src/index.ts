@@ -10,6 +10,8 @@ import { Contract } from "./entities/Contract";
 import kakaoAuthorization from "./routes/kakaoAuthorization";
 import axios from "axios";
 import { Configuration, OpenAIApi } from "openai";
+import { Alchemy, Network } from "alchemy-sdk";
+import { Transfer } from "./entities/Transfer";
 
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const PORT = IS_PRODUCTION ? process.env.PORT : 4002;
@@ -76,14 +78,25 @@ const generateNames = async (): Promise<string[]> => {
   }
 };
 
+const test = async () => {
+  // await getRepository(Transfer).delete({});
+  // console.log("완료");
+  const config = {
+    apiKey: process.env.ALCHEMY_API_KEY,
+    network: Network.ETH_MAINNET,
+  };
+  const alchemy = new Alchemy(config);
+  const data = await alchemy.core.getBlock(
+    "0xf8fc162909c508c2ba357267da41c87f3fea22d132a7d792fd1762dbbf4ca376"
+  );
+  console.log("data", data);
+};
+
 createConnection(connectionOptions)
   .then(() => {
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
-      // chatGPTTest();
-      // const test = await generateNames();
-      // console.log("test", test);
       if (IS_PRODUCTION) {
         await deleteNotCompleteContract();
       }
