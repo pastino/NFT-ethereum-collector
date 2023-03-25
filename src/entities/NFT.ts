@@ -31,10 +31,10 @@ export class NFT {
   @Column({ nullable: true })
   title: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 4000 })
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 4000 })
   mediaGateway: string;
 
   @Column({ nullable: true })
