@@ -51,6 +51,13 @@ const createWallet = async (walletAddress: string) => {
 };
 
 const createNFT = async (contractAddress: string, contract: Contract) => {
+  const nftCount = await getRepository(NFT).count({
+    where: {
+      contract,
+    },
+  });
+  if (nftCount > 0) return;
+
   // NFT 저장
   let cursor;
   let page = 1;

@@ -60,7 +60,7 @@ export class Transaction {
   @Column({ nullable: true })
   nonce: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 8000 })
   data: string;
 
   @Column({ nullable: true })
