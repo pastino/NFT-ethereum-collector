@@ -21,7 +21,7 @@ export class Transaction {
   @OneToOne(() => Transfer, (transfer) => transfer.transaction, {
     onDelete: "CASCADE",
   })
-  @JoinColumn({ name: "transactionId", referencedColumnName: "id" })
+  @JoinColumn({ name: "transferId", referencedColumnName: "id" })
   transfer: Transfer;
 
   @Column({ nullable: true })

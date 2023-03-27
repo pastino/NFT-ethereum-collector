@@ -157,6 +157,7 @@ const test = async () => {
               );
 
               console.log(decodedLog);
+              console.log(log.address);
             } else {
               console.log("This log is not an NFT Transfer event.");
             }
@@ -174,6 +175,7 @@ createConnection(connectionOptions)
     console.log("DB CONNECTION!");
     app.listen(PORT, async () => {
       console.log(`Listening on port: "http://localhost:${PORT}"`);
+      // test();
       if (IS_PRODUCTION) {
         await deleteNotCompleteContract();
       }
